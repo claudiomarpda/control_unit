@@ -2,9 +2,10 @@
 // Created by mz on 05/09/17.
 //
 
-#include <stdio.h>
-#include <memory.h>
 #include "../include/memory.h"
+
+#include <stdio.h>
+#include <string.h>
 
 /**
 	Loads the instructions into the memory.
@@ -22,7 +23,7 @@ int loadInstructions(const char *fileName) {
     // goes through the file
     for (int i = 0; !feof(file); i++) {
         // read a line and store it as an instruction
-        fgets(instructionMemory[i], LINE_LENGTH, file);
+        fgets(instructionMemory[i], INSTRUCTION_LENGTH, file);
     }
 
     fclose(file);
@@ -85,4 +86,21 @@ int loadMemory(const char *instructionsFileName, const char *dataFileName) {
         return 0;
     }
     return 1;
+}
+
+/**
+ * Gets a value from an address of memory data.
+ *
+ * @param address: where the value is stored
+ * @return the value stored, 0 if not found
+ */
+int indirectMemoryAccess(int address) {
+    // run through memory of data
+    for (int i = 0; i < MAX_LINES; i++) {
+        // look for the address
+        if (dataMemory[i][0] == address) {
+            return dataMemory[i][1];
+        }
+    }
+    return 0;
 }
