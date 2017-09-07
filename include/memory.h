@@ -17,5 +17,6 @@ int loadInstructions(const char *fileName);
 int loadData(const char *fileName);
 int loadMemory(const char *instructionsFileName, const char *dataFileName);
 int indirectMemoryAccess(int address);
+void writeMemory(const char *dataMemoryFileName, int mar, int mbr);
 
 #endif //CONTROLUNIT_MEMORY_H

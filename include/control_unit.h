@@ -49,6 +49,6 @@ int operand1, operand2, operand3;
 // Prototypes
 char *fetch(char instructionMemory[][INSTRUCTION_LENGTH]);
 void decode(const char *instruction);
-void execute(int operation);
+void execute(int operation, char *dataMemoryFile);
 
 #endif //CONTROLUNIT_CONTROL_UNIT_H

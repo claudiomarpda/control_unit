@@ -20,9 +20,9 @@ int loadInstructions(const char *fileName) {
         return 0;
     }
 
-    // goes through the file
+    // Goes through the file
     for (int i = 0; !feof(file); i++) {
-        // read a line and store it as an instruction
+        // Read a line and store it as an instruction
         fgets(instructionMemory[i], INSTRUCTION_LENGTH, file);
     }
 
@@ -105,4 +105,60 @@ int indirectMemoryAccess(int address) {
         }
     }
     return 0;
+}
+
+/**
+ * Updates memory of data looking for the right address and storing the new value.
+ *
+ * @param mar: the address of the new value
+ * @param mbr: the new value
+ */
+void updateMemory(int mar, int mbr) {
+    // Look for existent address
+    for (int i = 0; i < MAX_LINES; i++) {
+        if (dataMemory[i][0] == mar) {
+            dataMemory[i][1] = mbr;
+            return;
+        }
+    }
+    // If address is not in use, store it in the first free space of the array
+    for (int i = 0; i < MAX_LINES; i++) {
+        // Free spaces are identified by the default value -1
+        if(dataMemory[i][0] == -1) {
+            dataMemory[i][0] = mar;
+            dataMemory[i][1] = mbr;
+            return;
+        }
+    }
+}
+
+/**
+ * Writes the data from memory in an new output file.
+ *
+ * @param dataMemoryFile: the input file name
+ * @param mar: the address of the value
+ * @param mbr: the value
+ */
+void writeMemory(const char *dataMemoryFileName, const int mar, const int mbr) {
+    updateMemory(mar, mbr);
+
+    size_t nameSize = strlen(dataMemoryFileName) + strlen("output-");
+    char outName[nameSize];
+    strcpy(outName, "output-");
+    strcat(outName, dataMemoryFileName);
+    FILE *file = fopen(outName, "w");
+
+    if (file == NULL) {
+        printf("File %s could not be opened.\n", outName);
+        return;
+    }
+
+    // Goes through the array of data until a default index value or the end of array
+    for (int i = 0; i < MAX_LINES; i++) {
+        if(dataMemory[i][0] != -1) {
+            fprintf(file, "%d %d\n", dataMemory[i][0], dataMemory[i][1]);
+        }
+    }
+
+    fclose(file);
 }

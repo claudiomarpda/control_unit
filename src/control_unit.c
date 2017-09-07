@@ -10,7 +10,7 @@
 #include <string.h>
 
 /**
- * Fetches the next instruction according to program counter.
+ * Fetches the next instruction which the program counter is pointing to.
  *
  * @return an instruction as string
  */
@@ -53,7 +53,8 @@ void decode(const char *instruction) {
     token = strtok(instructionCopy, " ");
     if (strcmp(token, "LOAD") == 0) {
         operation = LOAD;
-        // Example: LOAD R ADDRESS
+        // Pattern: LOAD R ADDRESS
+        // Example: LOAD R1 100
         // Load the value from the address into the register
 
         // Get the first operand, which must be a register
@@ -68,9 +69,13 @@ void decode(const char *instruction) {
         operand2 = atoi(token);
 
     } else if (strcmp(token, "MOVE") == 0) {
-        // Example: MOVE R CONSTANT
-        // Example: MOVE R R
-        // Move to the register R the CONSTANT or the value of the register R
+        // Move to the first register R the CONSTANT or the value of the register R
+
+        // Pattern 1: MOVE R CONSTANT
+        // Example 1: MOVE R1 2017
+
+        // Pattern 2: MOVE R R
+        // Example 2: MOVE R1 R2
 
         // Get the first operand, which must be a register
         token = strtok(NULL, " ");
@@ -93,8 +98,22 @@ void decode(const char *instruction) {
         }
 
     } else if (strcmp(token, "STORE") == 0) {
-        // TODO: Decode this operation
         operation = STORE;
+        // Store in ADDRESS the value of register R
+        // Pattern: STORE R ADDRESS
+        // Example: STORE R1 100
+
+        // Get the first operand, which must be a register
+        token = strtok(NULL, " ");
+        if (token[0] == 'R') {
+            operand1 = token[1] - '0'; // the number of the register
+            operand1 = reg[operand1-1]; // decrements 1 to fit in the index of the registers
+        }
+
+        // Get the second operand, which must be an address
+        token = strtok(NULL, " ");
+        operand2 = atoi(token);
+
     } else if (strcmp(token, "ADD") == 0) {
         // TODO: Decode this operation
         operation = ADD;
@@ -117,7 +136,7 @@ void decode(const char *instruction) {
  *
  * @param operation
  */
-void execute(const int operation) {
+void execute(const int operation, char *dataMemoryFile) {
     switch (operation) {
         case LOAD:
             puts("LOAD operation");
@@ -133,19 +152,24 @@ void execute(const int operation) {
             puts("MOVE operation");
             reg[operand1] = reg[operand2];
             if (LOG) {
-                printf("R%d receives the constant %d\n\n", operand1 + 1, reg[operand1], operand2 + 1);
+                printf("R%d receives %d from R%d\n\n", operand1 + 1, reg[operand1], operand2 + 1);
             }
             break;
         case MOVE_CONST:
             puts("MOVE operation");
             reg[operand1] = operand2;
             if (LOG) {
-                printf("R%d receives %d from R%d\n\n", operand1 + 1, reg[operand1], operand2 + 1);
+                printf("R%d receives %d constant\n\n", operand1 + 1, reg[operand1]);
             }
             break;
         case STORE:
-            puts("STORE operation\n\n");
-            // TODO: Execute this operation
+            puts("STORE operation");
+            mar = operand2;
+            mbr = operand1;
+            writeMemory(dataMemoryFile, mar, mbr);
+            if(LOG) {
+                puts("Memory was written\n");
+            }
             break;
         case ADD:
             puts("ADD operation\n\n");

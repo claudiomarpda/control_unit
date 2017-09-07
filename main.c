@@ -5,7 +5,11 @@
 
 int main() {
     // Load memory of instructions and data
-    if (!loadMemory("instructions-memory.txt", "data-memory.txt")) {
+
+    char *instructionsMemoryFileName = "instructions-memory.txt";
+    char *dataMemoryFileName = "data-memory.txt";
+
+    if (!loadMemory(instructionsMemoryFileName, dataMemoryFileName)) {
         puts("ERROR: Could not load memory");
         return 0;
     }
@@ -32,13 +36,17 @@ int main() {
                 state = EXECUTE;
                 break;
             case EXECUTE:
-                execute(operation);
+                execute(operation, dataMemoryFileName);
                 state = FETCH;
                 break;
 //            case INDIRECT_ACCESS:
                 mbr = indirectMemoryAccess(mar);
         }
     }
+
+    FILE *f = fopen("opa.txt", "w");
+    fprintf(f, "aaaaaaaaaaaaaaaaaa");
+    fclose(f);
 
     return 0;
 }
