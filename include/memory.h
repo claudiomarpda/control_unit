@@ -13,10 +13,19 @@ char instructionMemory[MAX_LINES][INSTRUCTION_LENGTH];
 int dataMemory[MAX_LINES][2];
 
 // Prototypes
-int loadInstructions(const char *fileName);
-int loadData(const char *fileName);
+
+// Some prototypes are commented to avoid interface usage
+
+//int loadInstructions(const char *fileName);
+
+//int loadData(const char *fileName);
+
 int loadMemory(const char *instructionsFileName, const char *dataFileName);
+
 int indirectMemoryAccess(int address);
+
+void updateMemory(int mar, int mbr);
+
 void writeMemory(const char *dataMemoryFileName, int mar, int mbr);
 
 #endif //CONTROLUNIT_MEMORY_H

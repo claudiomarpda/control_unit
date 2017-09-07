@@ -12,7 +12,7 @@
 
 // All possible states of the instruction cycle
 enum states {
-    FETCH, DECODE, EXECUTE, INDIRECT_ACCESS, FINISH
+    FETCH, DECODE, EXECUTE, FINISH
 };
 
 // All possible operation types
@@ -46,9 +46,28 @@ int mar;
  */
 int operand1, operand2, operand3;
 
+
 // Prototypes
+
+// Some prototypes are commented to avoid interface usage
+
 char *fetch(char instructionMemory[][INSTRUCTION_LENGTH]);
+
 void decode(const char *instruction);
-void execute(int operation, char *dataMemoryFile);
+
+void execute(int operation);
+
+//void decodeLoadOperation(const char *token);
+
+//void decodeMoveOperation(const char *token);
+
+//void decodeStoreOperation(const char *token);
+
+//void decodeArithmeticOperation(const char *token);
+
+//void decodeJumpOperation(char *token);
+
+//int getRegisterIndex(const char *token);
+
 
 #endif //CONTROLUNIT_CONTROL_UNIT_H

@@ -3,11 +3,14 @@
 #include "include/memory.h"
 #include "include/control_unit.h"
 
+/**
+ * Reads instructions and data from memory and handles the instruction cycle until the end of the instructions.
+ */
 int main() {
-    // Load memory of instructions and data
 
-    char *instructionsMemoryFileName = "instructions-memory.txt";
-    char *dataMemoryFileName = "data-memory.txt";
+    ir = NULL;
+    char *instructionsMemoryFileName = "instructions-memory1.txt";
+    char *dataMemoryFileName = "data-memory1.txt";
 
     if (!loadMemory(instructionsMemoryFileName, dataMemoryFileName)) {
         puts("ERROR: Could not load memory");
@@ -16,14 +19,14 @@ int main() {
 
     state = FETCH;
 
-    // Handle the instruction cycles
+    // Handle the instruction cycle
     while (state != FINISH) {
         switch (state) {
             case FETCH:
                 ir = fetch(instructionMemory);
-                if(ir == NULL) {
-                    if(LOG) {
-                        puts("End of instructions");
+                if (ir == NULL) {
+                    if (LOG) {
+                        puts("End of instructions #");
                     }
                     // There is no more instructions
                     state = FINISH;
@@ -36,17 +39,13 @@ int main() {
                 state = EXECUTE;
                 break;
             case EXECUTE:
-                execute(operation, dataMemoryFileName);
+                execute(operation);
                 state = FETCH;
                 break;
-//            case INDIRECT_ACCESS:
-                mbr = indirectMemoryAccess(mar);
         }
     }
 
-    FILE *f = fopen("opa.txt", "w");
-    fprintf(f, "aaaaaaaaaaaaaaaaaa");
-    fclose(f);
+    writeMemory(dataMemoryFileName, mar, mbr);
 
     return 0;
 }
