@@ -52,6 +52,7 @@ void decode(const char *instruction) {
     // Get the operation
     token = strtok(instructionCopy, " ");
     if (strcmp(token, "LOAD") == 0) {
+        operation = LOAD;
         // Example: LOAD R ADDRESS
         // Load the value from the address into the register
 
@@ -66,29 +67,48 @@ void decode(const char *instruction) {
         token = strtok(NULL, " ");
         operand2 = atoi(token);
 
-        operation = LOAD;
-
     } else if (strcmp(token, "MOVE") == 0) {
-        // TODO: Handle the decoding of this operation
-        operation = MOVE;
+        // Example: MOVE R CONSTANT
+        // Example: MOVE R R
+        // Move to the register R the CONSTANT or the value of the register R
+
+        // Get the first operand, which must be a register
+        token = strtok(NULL, " ");
+        if (token[0] == 'R') {
+            operand1 = token[1] - '0'; // the index of the register
+            operand1 -= 1; // decrements 1 to fit in the index of the registers
+        }
+
+        // Get the second operand, which must be a value or a register
+        token = strtok(NULL, " ");
+        // Check if it is a register
+        if (token[0] == 'R') {
+            operation = MOVE_REGISTER;
+            operand2 = token[1] - '0'; // the number of the register
+            operand1 -= 1; // decrements 1 to fit in the index of the registers
+        } else {
+            // It must be a value
+            operation = MOVE_CONST;
+            operand2 = atoi(token);
+        }
 
     } else if (strcmp(token, "STORE") == 0) {
-        // TODO: Handle the decoding of this operation
+        // TODO: Decode this operation
         operation = STORE;
     } else if (strcmp(token, "ADD") == 0) {
-        // TODO: Handle the decoding of this operation
+        // TODO: Decode this operation
         operation = ADD;
     } else if (strcmp(token, "SUBTRACT") == 0) {
-        // TODO: Handle the decoding of this operation
+        // TODO: Decode this operation
         operation = SUBTRACT;
     } else if (strcmp(token, "MULTIPLY") == 0) {
-        // TODO: Handle the decoding of this operation
+        // TODO: Decode this operation
         operation = MULTIPLY;
     } else if (strcmp(token, "DIVIDE") == 0) {
-        // TODO: Handle the decoding of this operation
+        // TODO: Decode this operation
         operation = DIVIDE;
     } else if (strcmp(token, "JUMP") == 0) {
-        // TODO: Handle the decoding of this operation
+        // TODO: Decode this operation
         operation = JUMP;
     }
 }
@@ -109,33 +129,43 @@ void execute(const int operation) {
                 printf("R%d receives %d from address %d\n\n", operand1 + 1, reg[operand1], mar);
             }
             break;
-        case MOVE:
-            puts("MOVE operation\n\n");
-            // TODO: Handle the execution of this operation
+        case MOVE_REGISTER:
+            puts("MOVE operation");
+            reg[operand1] = reg[operand2];
+            if (LOG) {
+                printf("R%d receives the constant %d\n\n", operand1 + 1, reg[operand1], operand2 + 1);
+            }
+            break;
+        case MOVE_CONST:
+            puts("MOVE operation");
+            reg[operand1] = operand2;
+            if (LOG) {
+                printf("R%d receives %d from R%d\n\n", operand1 + 1, reg[operand1], operand2 + 1);
+            }
             break;
         case STORE:
             puts("STORE operation\n\n");
-            // TODO: Handle the execution of this operation
+            // TODO: Execute this operation
             break;
         case ADD:
             puts("ADD operation\n\n");
-            // TODO: Handle the execution of this operation
+            // TODO: Execute this operation
             break;
         case SUBTRACT:
             puts("SUBTRACT operation\n\n");
-            // TODO: Handle the execution of this operation
+            // TODO: Execute this operation
             break;
         case MULTIPLY:
             puts("MULTIPLY operation\n\n");
-            // TODO: Handle the execution of this operation
+            // TODO: Execute this operation
             break;
         case DIVIDE:
             puts("DIVIDE operation\n\n");
-            // TODO: Handle the execution of this operation
+            // TODO: Execute this operation
             break;
         case JUMP:
             puts("JUMP operation\n\n");
-            // TODO: Handle the execution of this operation
+            // TODO: Execute this operation
             break;
     }
 }

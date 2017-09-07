@@ -8,7 +8,7 @@
 #include <string.h>
 
 /**
-	Loads the instructions into the memory.
+	Loads the instructions into the memory. File must end with an empty line.
 
 	@return 1 if success, 0 otherwise
 */
@@ -33,6 +33,8 @@ int loadInstructions(const char *fileName) {
 
 /**
 	Loads the data into the memory. Each line of data contains an index and a value.
+    The index is the memory address of the value.
+    File must end with an empty line.
 
 	@return 1 if success, 0 otherwise
 */
