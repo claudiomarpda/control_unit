@@ -17,7 +17,7 @@ enum states {
 
 // All possible operation types
 enum operations {
-    LOAD, MOVE_REGISTER, MOVE_CONST, STORE, ADD, MULTIPLY, SUBTRACT, DIVIDE, JUMP, INCREMENT
+    LOAD, MOVE_REGISTER, MOVE_CONST, STORE_REGISTER, STORE_CONST, ADD, MULTIPLY, SUBTRACT, DIVIDE, JUMP, INCREMENT
 };
 
 // The current state of the instruction cycle

@@ -89,22 +89,31 @@ void decodeMoveOperation(const char *token) {
 }
 
 /**
- * Store the value of the register in the address.
- * Pattern: STORE Rn ADDRESS
+ * Store the value of the register in the address. The address can be a constant or a register value.
+ * Pattern: STORE Rn CONSTANT
  * Example: STORE R1 100
+ * Pattern: STORE Rn Rn
+ * Example: STORE R1 R2
  *
  * @param token: string with the operands
  */
 void decodeStoreOperation(const char *token) {
 
-    // TODO: Accept the value of a register as an address
-
     // Get the first operand, which must be a register
     operand1 = getRegisterIndex(token);
 
-    // Get the second operand, which must be an address
+    // Get the second operand, which must be a value or a register
     token = strtok(NULL, " ");
-    operand2 = atoi(token);
+    // Check if it is a register
+    if (token[0] == 'R') {
+        operation = STORE_REGISTER;
+        operand2 = token[1] - '0'; // the number of the register
+        operand2 -= 1; // decrements 1 to fit in the index of the registers
+    } else {
+        // It must be a value
+        operation = STORE_CONST;
+        operand2 = atoi(token);
+    }
 }
 
 /**
@@ -195,7 +204,6 @@ void decode(const char *instruction) {
 
     } else if (strcmp(token, "STORE") == 0) {
         decodeStoreOperation(token);
-        operation = STORE;
 
     } else if (strcmp(token, "ADD") == 0) {
         decodeArithmeticOperation(token);
@@ -254,7 +262,15 @@ void execute(const int operation) {
                 printf("R%d = %d constant\n\n", operand1 + 1, reg[operand1]);
             }
             break;
-        case STORE:
+        case STORE_REGISTER:
+            mar = reg[operand2];
+            mbr = reg[operand1];
+            updateMemory(mar, mbr);
+            if (LOG) {
+                printf("Store %d from R%d at %d\n\n", reg[operand1], operand1 + 1, reg[operand2]);
+            }
+            break;
+        case STORE_CONST:
             mar = operand2;
             mbr = reg[operand1];
             updateMemory(mar, mbr);
@@ -288,7 +304,7 @@ void execute(const int operation) {
             break;
         case JUMP:
             if (LOG) {
-                printf("Jump try: R%d = %d compared to %d; Target instruction: %d", operand1 + 1, reg[operand1],
+                printf("Jump try: R%d = %d compared to %d; Target instruction: %d;", operand1 + 1, reg[operand1],
                        operand2, operand3);
             }
             // Check if the comparison is true
@@ -296,11 +312,11 @@ void execute(const int operation) {
                 // Updates PC with the new instruction index
                 pc = operand3;
                 if (LOG) {
-                    printf(" SUCCESS\n\n");
+                    printf(" LOOP\n\n");
                 }
             } else {
                 if (LOG) {
-                    printf(" FAIL\n\n");
+                    printf(" LOOP CONDITION FAILS\n\n");
                 }
             }
             break;
