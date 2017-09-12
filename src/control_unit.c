@@ -29,62 +29,6 @@ char *fetch(char instructionMemory[][INSTRUCTION_LENGTH]) {
 }
 
 /**
- * Decodes the instruction and prepare the operands and registers to the execution state.
- *
- * @param instruction: a string according to a language syntax
- */
-void decode(const char *instruction) {
-
-    if (LOG) {
-        printf("%s", instruction);
-        printf("Decoding.... ");
-    }
-
-    // Get the instruction size
-    size_t iSize = strlen(instruction);
-    // A copy of the instruction
-    char instructionCopy[iSize];
-    strcpy(instructionCopy, instruction);
-
-    // Will split the instruction to identify one by one, like operations, registers, addresses and constants.
-    // Examples: LOAD, 100, MOVE, R1...
-    char *token = NULL;
-
-    // Get the operation
-    token = strtok(instructionCopy, " ");
-    if (strcmp(token, "LOAD") == 0) {
-        decodeLoadOperation(token);
-
-    } else if (strcmp(token, "MOVE") == 0) {
-        decodeMoveOperation(token);
-
-    } else if (strcmp(token, "STORE") == 0) {
-        operation = STORE;
-        decodeStoreOperation(token);
-
-    } else if (strcmp(token, "ADD") == 0) {
-        decodeArithmeticOperation(token);
-        operation = ADD;
-
-    } else if (strcmp(token, "SUBTRACT") == 0) {
-        decodeArithmeticOperation(token);
-        operation = SUBTRACT;
-
-    } else if (strcmp(token, "MULTIPLY") == 0) {
-        decodeArithmeticOperation(token);
-        operation = MULTIPLY;
-
-    } else if (strcmp(token, "DIVIDE") == 0) {
-        decodeArithmeticOperation(token);
-        operation = DIVIDE;
-
-    } else if (strcmp(token, "JUMP") == 0) {
-        // TODO: decode this instruction
-        operation = JUMP;
-    }
-}
-
-/**
  * Extracts the index of the register from an instruction.
  * Example: R1, R2, R3...
  *
@@ -108,8 +52,6 @@ int getRegisterIndex(const char *token) {
  * @param token: string with the operands
  */
 void decodeLoadOperation(const char *token) {
-    operation = LOAD;
-
     // Get the first operand, which must be a register
     operand1 = getRegisterIndex(token);
 
@@ -155,6 +97,8 @@ void decodeMoveOperation(const char *token) {
  */
 void decodeStoreOperation(const char *token) {
 
+    // TODO: Accept the value of a register as an address
+
     // Get the first operand, which must be a register
     operand1 = getRegisterIndex(token);
 
@@ -180,6 +124,102 @@ void decodeArithmeticOperation(const char *token) {
 
     if (LOG) {
         printf("Arithmetic with %d and %d; \t", reg[operand2], reg[operand3]);
+    }
+}
+
+/**
+ * Decodes the instruction to jump to an index of the instruction memory.
+ * Compares the value of a register with a constant value and, in case they are equal, jumps to an instruction address.
+ * Pattern: JUMP R CONSTANT INDEX
+ * Example: JUMP R1 0 5. It means: Jump, if R1 equals 0, to the instruction of index 5.
+ *
+ * @param token: string with the register, the value to be compared, and the index of the instruction
+ */
+void decodeJumpOperation(const char *token) {
+    // The register
+    operand1 = getRegisterIndex(token);
+    token = strtok(NULL, " ");
+    // Value to be compared with the value of the register
+    operand2 = atoi(token);
+    token = strtok(NULL, " ");
+    // The index of the instruction, in case the comparison succeeds
+    operand3 = atoi(token);
+}
+
+/**
+ * Decodes the instruction to increment 1 to the value of a register.
+ *
+ * @param token: the string with the register
+ */
+void decodeIncrementOperation(char *token) {
+    token = strtok(NULL, " ");
+    // Counts the number of characters until it hits a '\n'
+    size_t i = strcspn(token, "\n");
+    token[i] = '\0';
+    if (token[0] == 'R') {
+        operand1 = token[1] - '0'; // the number of the register
+        operand1--; // decrements 1 to fit in the index of the registers
+    }
+}
+
+/**
+ * Decodes the instruction and prepare the operands and registers to the execution state.
+ *
+ * @param instruction: a string according to a language syntax
+ */
+void decode(const char *instruction) {
+
+    if (LOG) {
+        printf("%s", instruction);
+        printf("Decoding.... ");
+    }
+
+    // Get the instruction size
+    size_t iSize = strlen(instruction);
+    // A copy of the instruction
+    char instructionCopy[iSize];
+    strcpy(instructionCopy, instruction);
+
+    // Will receive pieces of the instruction to identify one by one, like operations, registers, addresses and constants.
+    // Examples: LOAD, 100, MOVE, R1...
+    char *token = NULL;
+
+    // Get the operation
+    token = strtok(instructionCopy, " ");
+    if (strcmp(token, "LOAD") == 0) {
+        decodeLoadOperation(token);
+        operation = LOAD;
+
+    } else if (strcmp(token, "MOVE") == 0) {
+        decodeMoveOperation(token);
+
+    } else if (strcmp(token, "STORE") == 0) {
+        decodeStoreOperation(token);
+        operation = STORE;
+
+    } else if (strcmp(token, "ADD") == 0) {
+        decodeArithmeticOperation(token);
+        operation = ADD;
+
+    } else if (strcmp(token, "SUBTRACT") == 0) {
+        decodeArithmeticOperation(token);
+        operation = SUBTRACT;
+
+    } else if (strcmp(token, "MULTIPLY") == 0) {
+        decodeArithmeticOperation(token);
+        operation = MULTIPLY;
+
+    } else if (strcmp(token, "DIVIDE") == 0) {
+        decodeArithmeticOperation(token);
+        operation = DIVIDE;
+
+    } else if (strcmp(token, "JUMP") == 0) {
+        decodeJumpOperation(token);
+        operation = JUMP;
+
+    } else if (strcmp(token, "INCREMENT") == 0) {
+        decodeIncrementOperation(token);
+        operation = INCREMENT;
     }
 }
 
@@ -219,7 +259,7 @@ void execute(const int operation) {
             mbr = reg[operand1];
             updateMemory(mar, mbr);
             if (LOG) {
-                printf("STORE %d from R%d at %d\n\n", reg[operand1], operand1 + 1, operand2);
+                printf("Store %d from R%d at %d\n\n", reg[operand1], operand1 + 1, operand2);
             }
             break;
         case ADD:
@@ -247,7 +287,28 @@ void execute(const int operation) {
             }
             break;
         case JUMP:
-            // TODO: Execute this operation
+            if (LOG) {
+                printf("Jump try: R%d = %d compared to %d; Target instruction: %d", operand1 + 1, reg[operand1],
+                       operand2, operand3);
+            }
+            // Check if the comparison is true
+            if (reg[operand1] != operand2) {
+                // Updates PC with the new instruction index
+                pc = operand3;
+                if (LOG) {
+                    printf(" SUCCESS\n\n");
+                }
+            } else {
+                if (LOG) {
+                    printf(" FAIL\n\n");
+                }
+            }
+            break;
+        case INCREMENT:
+            if (LOG) {
+                printf("Increment R%d = %d to %d\n\n", operand1 + 1, reg[operand1], reg[operand1] + 1);
+            }
+            reg[operand1] += 1;
             break;
     }
 }

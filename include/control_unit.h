@@ -17,7 +17,7 @@ enum states {
 
 // All possible operation types
 enum operations {
-    LOAD, MOVE_REGISTER, MOVE_CONST, STORE, ADD, MULTIPLY, SUBTRACT, DIVIDE, JUMP
+    LOAD, MOVE_REGISTER, MOVE_CONST, STORE, ADD, MULTIPLY, SUBTRACT, DIVIDE, JUMP, INCREMENT
 };
 
 // The current state of the instruction cycle
@@ -30,9 +30,7 @@ int pc;
 // Instruction register keeps an instruction in string format
 char *ir;
 // Registers load data from memory and are used to do arithmetic operations
-int reg[3];
-// Register for loop
-int loopReg;
+int reg[4];
 // Memory Bus Register
 int mbr;
 // Memory Access Register

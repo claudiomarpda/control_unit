@@ -9,8 +9,8 @@
 int main() {
 
     ir = NULL;
-    char *instructionsMemoryFileName = "instructions-memory1.txt";
-    char *dataMemoryFileName = "data-memory1.txt";
+    char *instructionsMemoryFileName = "instructions-memory2.txt";
+    char *dataMemoryFileName = "data-memory2.txt";
 
     if (!loadMemory(instructionsMemoryFileName, dataMemoryFileName)) {
         puts("ERROR: Could not load memory");
