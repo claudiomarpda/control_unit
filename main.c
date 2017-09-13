@@ -9,8 +9,9 @@
 int main() {
 
     ir = NULL;
-    char *instructionsMemoryFileName = "instructions-memory2.txt";
-    char *dataMemoryFileName = "data-memory2.txt";
+    cycles = 0;
+    char *instructionsMemoryFileName = "instructions-memory_fibonacci.txt";
+    char *dataMemoryFileName = "data-memory_fibonacci.txt";
 
     if (!loadMemory(instructionsMemoryFileName, dataMemoryFileName)) {
         puts("ERROR: Could not load memory");
@@ -46,6 +47,6 @@ int main() {
     }
 
     writeMemory(dataMemoryFileName, mar, mbr);
-
+    printf("Process finished with %d cycles.\n", cycles);
     return 0;
 }

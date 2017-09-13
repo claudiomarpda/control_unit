@@ -144,7 +144,7 @@ void writeMemory(const char *dataMemoryFileName, const int mar, const int mbr) {
 
     size_t nameSize = strlen(dataMemoryFileName) + strlen("output-");
     char outName[nameSize];
-    strcpy(outName, "output-");
+    strcpy(outName, "output_");
     strcat(outName, dataMemoryFileName);
     FILE *file = fopen(outName, "w");
 

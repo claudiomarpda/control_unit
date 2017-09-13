@@ -138,9 +138,9 @@ void decodeArithmeticOperation(const char *token) {
 
 /**
  * Decodes the instruction to jump to an index of the instruction memory.
- * Compares the value of a register with a constant value and, in case they are equal, jumps to an instruction address.
+ * Compares the value of a register with a constant value and, in case they are not equal, jumps to an instruction address.
  * Pattern: JUMP R CONSTANT INDEX
- * Example: JUMP R1 0 5. It means: Jump, if R1 equals 0, to the instruction of index 5.
+ * Example: JUMP R1 0 5. It means: Jump, if R1 is not equal to 0, to the instruction of index 5.
  *
  * @param token: string with the register, the value to be compared, and the index of the instruction
  */
@@ -151,7 +151,7 @@ void decodeJumpOperation(const char *token) {
     // Value to be compared with the value of the register
     operand2 = atoi(token);
     token = strtok(NULL, " ");
-    // The index of the instruction, in case the comparison succeeds
+    // The index of the instruction, in case the comparison results not equal
     operand3 = atoi(token);
 }
 
@@ -228,6 +228,10 @@ void decode(const char *instruction) {
     } else if (strcmp(token, "INCREMENT") == 0) {
         decodeIncrementOperation(token);
         operation = INCREMENT;
+
+    } else if (strcmp(token, "DECREMENT") == 0) {
+        decodeIncrementOperation(token);
+        operation = DECREMENT;
     }
 }
 
@@ -240,12 +244,17 @@ void execute(const int operation) {
     if (LOG) {
         printf("\nExecuting... ");
     }
+
+    // Let's assume that every execution costs 1 cycle
+    cycles++;
+
     switch (operation) {
         case LOAD:
             mar = operand2;
             mbr = indirectMemoryAccess(mar);
             reg[operand1] = mbr;
-
+            // Let's assume that every fetch in memory costs 4 cycles additionally
+            cycles += 4;
             if (LOG) {
                 printf("R%d = %d from address %d\n\n", operand1 + 1, reg[operand1], operand2);
             }
@@ -307,16 +316,16 @@ void execute(const int operation) {
                 printf("Jump try: R%d = %d compared to %d; Target instruction: %d;", operand1 + 1, reg[operand1],
                        operand2, operand3);
             }
-            // Check if the comparison is true
+            // Check the loop condition
             if (reg[operand1] != operand2) {
                 // Updates PC with the new instruction index
                 pc = operand3;
                 if (LOG) {
-                    printf(" LOOP\n\n");
+                    printf(" Loop\n\n");
                 }
             } else {
                 if (LOG) {
-                    printf(" LOOP CONDITION FAILS\n\n");
+                    printf(" Loop condition fails\n\n");
                 }
             }
             break;
@@ -324,7 +333,13 @@ void execute(const int operation) {
             if (LOG) {
                 printf("Increment R%d = %d to %d\n\n", operand1 + 1, reg[operand1], reg[operand1] + 1);
             }
-            reg[operand1] += 1;
+            reg[operand1]++;
+            break;
+        case DECREMENT:
+            if (LOG) {
+                printf("Decrement R%d = %d to %d\n\n", operand1 + 1, reg[operand1], reg[operand1] - 1);
+            }
+            reg[operand1]--;
             break;
     }
 }
