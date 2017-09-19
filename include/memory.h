@@ -16,9 +16,9 @@ int dataMemory[MAX_LINES][2];
 
 // Some prototypes are commented to avoid interface usage
 
-//int loadInstructions(const char *fileName);
+int loadInstructions(const char *fileName);
 
-//int loadData(const char *fileName);
+int loadData(const char *fileName);
 
 int loadMemory(const char *instructionsFileName, const char *dataFileName);
 

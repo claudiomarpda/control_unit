@@ -17,7 +17,7 @@ enum states {
 
 // All possible operation types
 enum operations {
-    LOAD, MOVE_REGISTER, MOVE_CONST, STORE_REGISTER, STORE_CONST, ADD, MULTIPLY, SUBTRACT, DIVIDE, JUMP, INCREMENT, DECREMENT
+    LOAD_ADDRESS, LOAD_REGISTER, MOVE_REGISTER, MOVE_CONST, STORE_REGISTER, STORE_CONST, ADD, MULTIPLY, SUBTRACT, DIVIDE, CONDITIONAL_JUMP, UNCONDITIONAL_JUMP, INCREMENT, DECREMENT
 };
 
 // The current state of the instruction cycle
@@ -30,7 +30,7 @@ int pc;
 // Instruction register keeps an instruction in string format
 char *ir;
 // Registers load data from memory and are used to do arithmetic operations
-int reg[4];
+int reg[9];
 // Memory Bus Register
 int mbr;
 // Memory Access Register
@@ -56,17 +56,17 @@ void decode(const char *instruction);
 
 void execute(int operation);
 
-//void decodeLoadOperation(const char *token);
+void decodeLoadOperation(const char *token);
 
-//void decodeMoveOperation(const char *token);
+void decodeMoveOperation(const char *token);
 
-//void decodeStoreOperation(const char *token);
+void decodeStoreOperation(const char *token);
 
-//void decodeArithmeticOperation(const char *token);
+void decodeArithmeticOperation(const char *token);
 
-//void decodeJumpOperation(char *token);
+void decodeJumpOperation(const char *token);
 
-//int getRegisterIndex(const char *token);
+int getRegisterIndex(const char *token);
 
 
 #endif //CONTROLUNIT_CONTROL_UNIT_H

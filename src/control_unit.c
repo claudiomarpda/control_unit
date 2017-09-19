@@ -32,11 +32,10 @@ char *fetch(char instructionMemory[][INSTRUCTION_LENGTH]) {
  * Extracts the index of the register from an instruction.
  * Example: R1, R2, R3...
  *
- * @param token: must have a register as the first string
+ * @param token: must contain a register as the first string
  * @return the index found or -1 otherwise
  */
 int getRegisterIndex(const char *token) {
-    token = strtok(NULL, " ");
     if (token[0] == 'R') {
         int operand = token[1] - '0'; // the number of the register
         return operand - 1; // decrements 1 to fit in the index of the registers
@@ -46,18 +45,31 @@ int getRegisterIndex(const char *token) {
 
 /**
  * Load in the register the value from the address.
- * Pattern: LOAD Rn ADDRESS
+ * The address can come from a constant value or a value of a register.
+ * Pattern: LOAD Rn CONSTANT
  * Example: LOAD R1 100
+ * Pattern: LOAD Rn Rn
+ * Example: LOAD R1 R2
  *
- * @param token: string with the operands
+ * @param token: instruction with the operands
  */
 void decodeLoadOperation(const char *token) {
     // Get the first operand, which must be a register
-    operand1 = getRegisterIndex(token);
-
-    // Get the second operand, which must be an address
     token = strtok(NULL, " ");
-    operand2 = atoi(token);
+    operand1 = getRegisterIndex(token);
+    token = strtok(NULL, " ");
+
+    // Get the second operand
+    // The value is in a register
+    if (token[0] == 'R') {
+        operation = LOAD_REGISTER;
+        operand2 = getRegisterIndex(token);
+    }
+        // The value is an address
+    else {
+        operation = LOAD_ADDRESS;
+        operand2 = atoi(token);
+    }
 }
 
 /**
@@ -67,11 +79,12 @@ void decodeLoadOperation(const char *token) {
  * Pattern 2: MOVE Rn Rn
  * Example 2: MOVE R1 R2
  *
- * @param token: string with the operands
+ * @param token: instruction with the operands
  */
 void decodeMoveOperation(const char *token) {
 
     // Get the first operand, which must be a register
+    token = strtok(NULL, " ");
     operand1 = getRegisterIndex(token);
 
     // Get the second operand, which must be a value or a register
@@ -95,11 +108,12 @@ void decodeMoveOperation(const char *token) {
  * Pattern: STORE Rn Rn
  * Example: STORE R1 R2
  *
- * @param token: string with the operands
+ * @param token: instruction with the operands
  */
 void decodeStoreOperation(const char *token) {
 
     // Get the first operand, which must be a register
+    token = strtok(NULL, " ");
     operand1 = getRegisterIndex(token);
 
     // Get the second operand, which must be a value or a register
@@ -122,13 +136,16 @@ void decodeStoreOperation(const char *token) {
  * Example 1: ADD R1 R2 R3
  * Example 2: DIVIDE R1 R2 R3 is equivalent to R1 = (R2 / R3)
  *
- * @param token: string with the operands
+ * @param token: instruction with the operands
  */
 void decodeArithmeticOperation(const char *token) {
 
     // Get the three registers
+    token = strtok(NULL, " ");
     operand1 = getRegisterIndex(token);
+    token = strtok(NULL, " ");
     operand2 = getRegisterIndex(token);
+    token = strtok(NULL, " ");
     operand3 = getRegisterIndex(token);
 
     if (LOG) {
@@ -142,23 +159,53 @@ void decodeArithmeticOperation(const char *token) {
  * Pattern: JUMP R CONSTANT INDEX
  * Example: JUMP R1 0 5. It means: Jump, if R1 is not equal to 0, to the instruction of index 5.
  *
- * @param token: string with the register, the value to be compared, and the index of the instruction
+ * @param token: instruction with the register, the value to be compared, and the index of the instruction
  */
-void decodeJumpOperation(const char *token) {
+void decodeConditionalJumpOperation(const char *token) {
+    operation = CONDITIONAL_JUMP;
     // The register
     operand1 = getRegisterIndex(token);
     token = strtok(NULL, " ");
     // Value to be compared with the value of the register
     operand2 = atoi(token);
     token = strtok(NULL, " ");
-    // The index of the instruction, in case the comparison results not equal
+    // The index of the next instruction, in case the comparison results not equal
     operand3 = atoi(token);
+}
+
+
+/**
+ * Decodes unconditional jump operation.
+ *
+ * @param token: instruction with the index of the next instruction
+ */
+void decodeUnconditionalJumpOperation(const char *token) {
+    operation = UNCONDITIONAL_JUMP;
+    // The index of the next instruction
+    operand1 = atoi(token);
+}
+
+/**
+ * Identifies the jump operations type: conditional or unconditional.
+ *
+ * @param token: the instruction with the operands
+ */
+void decodeJumpOperation(const char *token) {
+    token = strtok(NULL, " ");
+    // The first operand is a register
+    if (token[0] == 'R') {
+        decodeConditionalJumpOperation(token);
+    }
+        // The first and only operand is an instruction index
+    else {
+        decodeUnconditionalJumpOperation(token);
+    }
 }
 
 /**
  * Decodes the instruction to increment 1 to the value of a register.
  *
- * @param token: the string with the register
+ * @param token: the instruction with the register
  */
 void decodeIncrementOperation(char *token) {
     token = strtok(NULL, " ");
@@ -170,6 +217,7 @@ void decodeIncrementOperation(char *token) {
         operand1--; // decrements 1 to fit in the index of the registers
     }
 }
+
 
 /**
  * Decodes the instruction and prepare the operands and registers to the execution state.
@@ -197,7 +245,6 @@ void decode(const char *instruction) {
     token = strtok(instructionCopy, " ");
     if (strcmp(token, "LOAD") == 0) {
         decodeLoadOperation(token);
-        operation = LOAD;
 
     } else if (strcmp(token, "MOVE") == 0) {
         decodeMoveOperation(token);
@@ -206,32 +253,31 @@ void decode(const char *instruction) {
         decodeStoreOperation(token);
 
     } else if (strcmp(token, "ADD") == 0) {
-        decodeArithmeticOperation(token);
         operation = ADD;
+        decodeArithmeticOperation(token);
 
     } else if (strcmp(token, "SUBTRACT") == 0) {
-        decodeArithmeticOperation(token);
         operation = SUBTRACT;
+        decodeArithmeticOperation(token);
 
     } else if (strcmp(token, "MULTIPLY") == 0) {
-        decodeArithmeticOperation(token);
         operation = MULTIPLY;
+        decodeArithmeticOperation(token);
 
     } else if (strcmp(token, "DIVIDE") == 0) {
-        decodeArithmeticOperation(token);
         operation = DIVIDE;
+        decodeArithmeticOperation(token);
 
     } else if (strcmp(token, "JUMP") == 0) {
         decodeJumpOperation(token);
-        operation = JUMP;
 
     } else if (strcmp(token, "INCREMENT") == 0) {
-        decodeIncrementOperation(token);
         operation = INCREMENT;
+        decodeIncrementOperation(token);
 
     } else if (strcmp(token, "DECREMENT") == 0) {
-        decodeIncrementOperation(token);
         operation = DECREMENT;
+        decodeIncrementOperation(token);
     }
 }
 
@@ -249,7 +295,7 @@ void execute(const int operation) {
     cycles++;
 
     switch (operation) {
-        case LOAD:
+        case LOAD_ADDRESS:
             mar = operand2;
             mbr = indirectMemoryAccess(mar);
             reg[operand1] = mbr;
@@ -257,6 +303,16 @@ void execute(const int operation) {
             cycles += 4;
             if (LOG) {
                 printf("R%d = %d from address %d\n\n", operand1 + 1, reg[operand1], operand2);
+            }
+            break;
+        case LOAD_REGISTER:
+            mar = reg[operand2];
+            mbr = indirectMemoryAccess(mar);
+            reg[operand1] = mbr;
+            // Let's assume that every fetch in memory costs 4 cycles additionally
+            cycles += 4;
+            if (LOG) {
+                printf("R%d = %d from address %d\n\n", operand1 + 1, reg[operand1], reg[operand2]);
             }
             break;
         case MOVE_REGISTER:
@@ -311,7 +367,7 @@ void execute(const int operation) {
                 printf("R%d = %d\n\n", operand1 + 1, reg[operand1]);
             }
             break;
-        case JUMP:
+        case CONDITIONAL_JUMP:
             if (LOG) {
                 printf("Jump try: R%d = %d compared to %d; Target instruction: %d;", operand1 + 1, reg[operand1],
                        operand2, operand3);
@@ -327,6 +383,12 @@ void execute(const int operation) {
                 if (LOG) {
                     printf(" Loop condition fails\n\n");
                 }
+            }
+            break;
+        case UNCONDITIONAL_JUMP:
+            pc = operand1;
+            if (LOG) {
+                printf("Jump to instruction of index %d\n", pc);
             }
             break;
         case INCREMENT:
