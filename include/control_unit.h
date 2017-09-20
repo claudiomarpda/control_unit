@@ -19,7 +19,8 @@ enum states {
 enum operations {
     LOAD_ADDRESS, LOAD_REGISTER, MOVE_REGISTER, MOVE_CONST,
     STORE_REGISTER, STORE_CONST, ADD, MULTIPLY, SUBTRACT, DIVIDE,
-    CONDITIONAL_JUMP, UNCONDITIONAL_JUMP, INCREMENT, DECREMENT, COMPARE
+    CONDITIONAL_JUMP, UNCONDITIONAL_JUMP, INCREMENT, DECREMENT,
+    COMPARE_REGISTER, COMPARE_CONST
 };
 
 // The current state of the instruction cycle
@@ -37,6 +38,8 @@ int reg[9];
 int mbr;
 // Memory Access Register
 int mar;
+// Comparison Register stores the result of the last compare operation
+int rc;
 
 /*
  * Operands identifiers. Handles three operand at most at a time.
@@ -49,8 +52,6 @@ int operand1, operand2, operand3;
 int cycles;
 
 // Prototypes
-
-// Some prototypes are commented to avoid interface usage
 
 char *fetch(char instructionMemory[][INSTRUCTION_LENGTH]);
 
@@ -73,8 +74,6 @@ void decodeConditionalJumpOperation(const char *token);
 void decodeUnconditionalJumpOperation(const char *token);
 
 void decodeIncrementOperation(char *token);
-
-void decodeJumpOperation(const char *token);
 
 void decodeCompareOperation(const char *token);
 

@@ -20,7 +20,7 @@ char *fetch(char instructionMemory[][INSTRUCTION_LENGTH]) {
     if (LOG) {
         printf("Fetching.... ");
     }
-    // check empty instruction
+    // Check empty instruction
     if (strcmp(instructionMemory[pc], "") == 0) {
         return NULL;
     } else {
@@ -155,51 +155,38 @@ void decodeArithmeticOperation(const char *token) {
 
 /**
  * Decodes the instruction to jump to an index of the instruction memory.
- * Compares the value of a register with a constant value and, in case they are not equal, jumps to an instruction address.
- * Pattern: JUMP R CONSTANT INDEX
- * Example: JUMP R1 0 5. It means: Jump, if R1 is not equal to 0, to the instruction of index 5.
+ * Compares the first constant value with the value in the comparison register and,
+ * if they are equal, jump condition is true.
+ * Note that to update the register, Compare operation must be done before calling the Jump operation.
+ * Pattern: JUMPc CONSTANT INDEX
+ * Example: JUMPc 0 5.
+ * It means: Jump, if the value in the comparison register is 0, to the instruction of index 5
  *
- * @param token: instruction with the register, the value to be compared, and the index of the instruction
+ * @param token: instruction with the value to be compared, and the index of the instruction
  */
 void decodeConditionalJumpOperation(const char *token) {
     operation = CONDITIONAL_JUMP;
-    // The register
-    operand1 = getRegisterIndex(token);
     token = strtok(NULL, " ");
     // Value to be compared with the value of the register
-    operand2 = atoi(token);
+    operand1 = atoi(token);
     token = strtok(NULL, " ");
     // The index of the next instruction, in case the comparison results not equal
-    operand3 = atoi(token);
+    operand2 = atoi(token);
 }
-
 
 /**
  * Decodes unconditional jump operation.
+ * Pattern: JUMPu CONSTANT
+ * Example: JUMPu 10
+ * It means: Jump to instruction of index 10
  *
  * @param token: instruction with the index of the next instruction
  */
 void decodeUnconditionalJumpOperation(const char *token) {
     operation = UNCONDITIONAL_JUMP;
+    token = strtok(NULL, " ");
     // The index of the next instruction
     operand1 = atoi(token);
-}
-
-/**
- * Identifies the jump operations type: conditional or unconditional.
- *
- * @param token: the instruction with the operands
- */
-void decodeJumpOperation(const char *token) {
-    token = strtok(NULL, " ");
-    // The first operand is a register
-    if (token[0] == 'R') {
-        decodeConditionalJumpOperation(token);
-    }
-        // The first and only operand is an instruction index
-    else {
-        decodeUnconditionalJumpOperation(token);
-    }
 }
 
 /**
@@ -219,10 +206,13 @@ void decodeIncrementOperation(char *token) {
 }
 
 /**
- * Decodes the comparison of two operands and stores it in a register.
+ * Decodes the comparison of two operands and stores it in the comparison register.
  * The comparison works according to arithmetic logic unit.
- * Pattern: COMPARE Rn Rn Rn
- * Example: COMPARE R3 R1 R2
+ * The first operand must be a register and the second must be a register or a constant.
+ * Pattern: COMPARE Rn Rn
+ * Example: COMPARE R1 R2
+ * Pattern: COMPARE Rn CONSTANT
+ * Example: COMPARE R1 0
  *
  * @param token: instruction with two operands.
  */
@@ -230,12 +220,19 @@ void decodeCompareOperation(const char *token) {
     token = strtok(NULL, " ");
     // The first register where the result will be stored
     operand1 = getRegisterIndex(token);
+
     token = strtok(NULL, " ");
-    // The second register
-    operand2 = getRegisterIndex(token);
-    token = strtok(NULL, " ");
-    // The third register
-    operand3 = getRegisterIndex(token);
+    // Get the second operand, which must be a value or a register
+    // Check if it is a register
+    if (token[0] == 'R') {
+        operation = COMPARE_REGISTER;
+        operand2 = token[1] - '0'; // the number of the register
+        operand2 -= 1; // decrements 1 to fit in the index of the registers
+    } else {
+        // It must be a value
+        operation = COMPARE_CONST;
+        operand2 = atoi(token);
+    }
 }
 
 
@@ -288,8 +285,13 @@ void decode(const char *instruction) {
         operation = DIVIDE;
         decodeArithmeticOperation(token);
 
-    } else if (strcmp(token, "JUMP") == 0) {
-        decodeJumpOperation(token);
+    } else if (strcmp(token, "JUMPc") == 0) {
+//        decodeJumpOperation(token);
+        decodeConditionalJumpOperation(token);
+
+    } else if (strcmp(token, "JUMPu") == 0) {
+//        decodeJumpOperation(token);
+        decodeUnconditionalJumpOperation(token);
 
     } else if (strcmp(token, "INCREMENT") == 0) {
         operation = INCREMENT;
@@ -300,7 +302,6 @@ void decode(const char *instruction) {
         decodeIncrementOperation(token);
 
     } else if (strcmp(token, "COMPARE") == 0) {
-        operation = COMPARE;
         decodeCompareOperation(token);
     }
 }
@@ -393,13 +394,12 @@ void execute(const int operation) {
             break;
         case CONDITIONAL_JUMP:
             if (LOG) {
-                printf("Jump try: R%d = %d compared to %d; Target instruction: %d;", operand1 + 1, reg[operand1],
-                       operand2, operand3);
+                printf("Jump try: %d compared to %d; Target instruction: %d;", rc, operand1, operand2);
             }
             // Check the loop condition
-            if (reg[operand1] != operand2) {
+            if (rc == operand1) {
                 // Updates PC with the new instruction index
-                pc = operand3;
+                pc = operand2;
                 if (LOG) {
                     printf(" Loop\n\n");
                 }
@@ -412,7 +412,7 @@ void execute(const int operation) {
         case UNCONDITIONAL_JUMP:
             pc = operand1;
             if (LOG) {
-                printf("Jump to instruction of index %d\n", pc);
+                printf("Jump to instruction of index %d\n\n", pc);
             }
             break;
         case INCREMENT:
@@ -427,12 +427,19 @@ void execute(const int operation) {
             }
             reg[operand1]--;
             break;
-        case COMPARE:
+        case COMPARE_REGISTER:
             if (LOG) {
-                printf("Compare %d with %d\n", reg[operand2], reg[operand3]);
+                printf("Compare %d with %d\n\n", reg[operand1], reg[operand2]);
             }
             // Compares two values from registers and stores the result in one register
-            reg[operand1] = compare(reg[operand2], reg[operand3]);
+            rc = compare(reg[operand1], reg[operand2]);
+            break;
+        case COMPARE_CONST:
+            if (LOG) {
+                printf("Compare %d with %d\n\n", reg[operand1], operand2);
+            }
+            // Compares two values from registers and stores the result in one register
+            rc = compare(reg[operand1], operand2);
             break;
     }
 }
