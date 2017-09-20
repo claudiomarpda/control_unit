@@ -17,7 +17,9 @@ enum states {
 
 // All possible operation types
 enum operations {
-    LOAD_ADDRESS, LOAD_REGISTER, MOVE_REGISTER, MOVE_CONST, STORE_REGISTER, STORE_CONST, ADD, MULTIPLY, SUBTRACT, DIVIDE, CONDITIONAL_JUMP, UNCONDITIONAL_JUMP, INCREMENT, DECREMENT
+    LOAD_ADDRESS, LOAD_REGISTER, MOVE_REGISTER, MOVE_CONST,
+    STORE_REGISTER, STORE_CONST, ADD, MULTIPLY, SUBTRACT, DIVIDE,
+    CONDITIONAL_JUMP, UNCONDITIONAL_JUMP, INCREMENT, DECREMENT, COMPARE
 };
 
 // The current state of the instruction cycle
@@ -56,6 +58,8 @@ void decode(const char *instruction);
 
 void execute(int operation);
 
+int getRegisterIndex(const char *token);
+
 void decodeLoadOperation(const char *token);
 
 void decodeMoveOperation(const char *token);
@@ -64,9 +68,14 @@ void decodeStoreOperation(const char *token);
 
 void decodeArithmeticOperation(const char *token);
 
+void decodeConditionalJumpOperation(const char *token);
+
+void decodeUnconditionalJumpOperation(const char *token);
+
+void decodeIncrementOperation(char *token);
+
 void decodeJumpOperation(const char *token);
 
-int getRegisterIndex(const char *token);
-
+void decodeCompareOperation(const char *token);
 
 #endif //CONTROLUNIT_CONTROL_UNIT_H

@@ -218,6 +218,26 @@ void decodeIncrementOperation(char *token) {
     }
 }
 
+/**
+ * Decodes the comparison of two operands and stores it in a register.
+ * The comparison works according to arithmetic logic unit.
+ * Pattern: COMPARE Rn Rn Rn
+ * Example: COMPARE R3 R1 R2
+ *
+ * @param token: instruction with two operands.
+ */
+void decodeCompareOperation(const char *token) {
+    token = strtok(NULL, " ");
+    // The first register where the result will be stored
+    operand1 = getRegisterIndex(token);
+    token = strtok(NULL, " ");
+    // The second register
+    operand2 = getRegisterIndex(token);
+    token = strtok(NULL, " ");
+    // The third register
+    operand3 = getRegisterIndex(token);
+}
+
 
 /**
  * Decodes the instruction and prepare the operands and registers to the execution state.
@@ -278,6 +298,10 @@ void decode(const char *instruction) {
     } else if (strcmp(token, "DECREMENT") == 0) {
         operation = DECREMENT;
         decodeIncrementOperation(token);
+
+    } else if (strcmp(token, "COMPARE") == 0) {
+        operation = COMPARE;
+        decodeCompareOperation(token);
     }
 }
 
@@ -402,6 +426,13 @@ void execute(const int operation) {
                 printf("Decrement R%d = %d to %d\n\n", operand1 + 1, reg[operand1], reg[operand1] - 1);
             }
             reg[operand1]--;
+            break;
+        case COMPARE:
+            if (LOG) {
+                printf("Compare %d with %d\n", reg[operand2], reg[operand3]);
+            }
+            // Compares two values from registers and stores the result in one register
+            reg[operand1] = compare(reg[operand2], reg[operand3]);
             break;
     }
 }

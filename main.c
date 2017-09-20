@@ -12,12 +12,14 @@ int main() {
     cycles = 0;
 //    char *instructionsMemoryFileName = "instructions-memory_arithmetic.txt";
 //    char *dataMemoryFileName = "data-memory_arithmetic.txt";
-    char *instructionsMemoryFileName = "instructions-memory_load-store.txt";
-    char *dataMemoryFileName = "data-memory_load-store.txt";
+//    char *instructionsMemoryFileName = "instructions-memory_load-store.txt";
+//    char *dataMemoryFileName = "data-memory_load-store.txt";
 //    char *instructionsMemoryFileName = "instructions-memory_factorial.txt";
 //    char *dataMemoryFileName = "data-memory_factorial.txt";
 //    char *instructionsMemoryFileName = "instructions-memory_fibonacci.txt";
 //    char *dataMemoryFileName = "data-memory_fibonacci.txt";
+    char *instructionsMemoryFileName = "instructions-memory_insertion-sort.txt";
+    char *dataMemoryFileName = "data-memory_insertion-sort.txt";
 
     if (!loadMemory(instructionsMemoryFileName, dataMemoryFileName)) {
         puts("ERROR: Could not load memory");
