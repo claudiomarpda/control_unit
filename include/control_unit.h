@@ -51,30 +51,121 @@ int operand1, operand2, operand3;
 
 int cycles;
 
-// Prototypes
+/**
+ * Fetches the next instruction which the program counter is pointing to.
+ *
+ * @return an instruction as string
+ */
+char *fetch(char instruction_memory[][INSTRUCTION_LENGTH]);
 
-char *fetch(char instructionMemory[][INSTRUCTION_LENGTH]);
+/**
+ * Extracts the index of the register from an instruction.
+ * Example: R1, R2, R3...
+ *
+ * @param token: must contain a register as the first string
+ * @return the index found or -1 otherwise
+ */
+int get_register_index(const char *token);
 
+/**
+ * Load in the register the value from the address.
+ * The address can come from a constant value or a value of a register.
+ * Pattern: LOAD Rn CONSTANT
+ * Example: LOAD R1 100
+ * Pattern: LOAD Rn Rn
+ * Example: LOAD R1 R2
+ *
+ * @param token: instruction with the operands
+ */
+void decode_load_operation(const char *token);
+
+/**
+ * Move to the first register the value of the right-side operand, which can be a register or a constant.
+ * Pattern 1: MOVE Rn CONSTANT
+ * Example 1: MOVE R1 2017
+ * Pattern 2: MOVE Rn Rn
+ * Example 2: MOVE R1 R2
+ *
+ * @param token: instruction with the operands
+ */
+void decode_move_operation(const char *token);
+
+/**
+ * Store the value of the register in the address. The address can be a constant or a register value.
+ * Pattern: STORE Rn CONSTANT
+ * Example: STORE R1 100
+ * Pattern: STORE Rn Rn
+ * Example: STORE R1 R2
+ *
+ * @param token: instruction with the operands
+ */
+void decode_store_operation(const char *token);
+
+/**
+ * Do arithmetic with the two right-side operands and assign the result to the first register.
+ * Pattern: OPERATION Rn Rn Rn
+ * Example 1: ADD R1 R2 R3
+ * Example 2: DIVIDE R1 R2 R3 is equivalent to R1 = (R2 / R3)
+ *
+ * @param token: instruction with the operands
+ */
+void decode_arithmetic_operation(const char *token);
+
+/**
+ * Decodes the instruction to jump to an index of the instruction memory.
+ * Compares the first constant value with the value in the comparison register and,
+ * if they are equal, jump condition is true.
+ * Note that to update the register, Compare operation must be done before calling the Jump operation.
+ * Pattern: JUMPc CONSTANT INDEX
+ * Example: JUMPc 0 5.
+ * It means: Jump, if the value in the comparison register is 0, to the instruction of index 5
+ *
+ * @param token: instruction with the value to be compared, and the index of the instruction
+ */
+void decode_conditional_jump_operation(const char *token);
+
+/**
+ * Decodes unconditional jump operation.
+ * Pattern: JUMPu CONSTANT
+ * Example: JUMPu 10
+ * It means: Jump to instruction of index 10
+ *
+ * @param token: instruction with the index of the next instruction
+ */
+void decode_unconditional_jump_operation(const char *token);
+
+/**
+ * Decodes the instruction to increment 1 to the value of a register.
+ *
+ * @param token: the instruction with the register
+ */
+void decode_increment_operation(char *token);
+
+/**
+ * Decodes the comparison of two operands and stores it in the comparison register.
+ * The comparison works according to arithmetic logic unit.
+ * The first operand must be a register and the second must be a register or a constant.
+ * Pattern: COMPARE Rn Rn
+ * Example: COMPARE R1 R2
+ * Pattern: COMPARE Rn CONSTANT
+ * Example: COMPARE R1 0
+ *
+ * @param token: instruction with two operands.
+ */
+void decode_compare_operation(const char *token);
+
+/**
+ * Decodes the instruction and prepare the operands and registers to the execution state.
+ *
+ * @param instruction: a string according to a language syntax
+ */
 void decode(const char *instruction);
 
+/**
+ * Executes one instruction using the values of operands and registers.
+ *
+ * @param operation: the first word of an instruction
+ */
 void execute(int operation);
-
-int getRegisterIndex(const char *token);
-
-void decodeLoadOperation(const char *token);
-
-void decodeMoveOperation(const char *token);
-
-void decodeStoreOperation(const char *token);
-
-void decodeArithmeticOperation(const char *token);
-
-void decodeConditionalJumpOperation(const char *token);
-
-void decodeUnconditionalJumpOperation(const char *token);
-
-void decodeIncrementOperation(char *token);
-
-void decodeCompareOperation(const char *token);
 
 #endif //CONTROLUNIT_CONTROL_UNIT_H

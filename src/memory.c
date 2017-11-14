@@ -12,24 +12,23 @@
 
 	@return 1 if success, 0 otherwise
 */
-int loadInstructions(const char *fileName) {
-    FILE *file = fopen(fileName, "r");
+int load_instructions(const char *file_name) {
+    FILE *file = fopen(file_name, "r");
 
     if (file == NULL) {
-        printf("File %s could not be opened.\n", fileName);
+        printf("File %s could not be opened.\n", file_name);
         return 0;
     }
 
     // Goes through the file
     for (int i = 0; !feof(file); i++) {
         // Read a line and store it as an instruction
-        fgets(instructionMemory[i], INSTRUCTION_LENGTH, file);
+        fgets(instruction_memory[i], INSTRUCTION_LENGTH, file);
     }
 
     fclose(file);
     return 1;
 }
-
 
 /**
 	Loads the data into the memory. Each line of data contains an index and a value.
@@ -38,11 +37,11 @@ int loadInstructions(const char *fileName) {
 
 	@return 1 if success, 0 otherwise
 */
-int loadData(const char *fileName) {
-    FILE *file = fopen(fileName, "r");
+int load_data(const char *file_name) {
+    FILE *file = fopen(file_name, "r");
 
     if (file == NULL) {
-        printf("File %s could not be opened.\n", fileName);
+        printf("File %s could not be opened.\n", file_name);
         return 0;
     }
 
@@ -52,8 +51,8 @@ int loadData(const char *fileName) {
      * [1] is the value
      */
     for (int i = 0; !feof(file); i++) {
-        fscanf(file, "%d", &dataMemory[i][0]);
-        fscanf(file, "%d", &dataMemory[i][1]);
+        fscanf(file, "%d", &data_memory[i][0]);
+        fscanf(file, "%d", &data_memory[i][1]);
     }
 
     fclose(file);
@@ -63,11 +62,11 @@ int loadData(const char *fileName) {
 /**
  * Initiates default values.
  */
-void initMemory() {
+void init_memory() {
     for (int i = 0; i < MAX_LINES; i++) {
-        strcpy(instructionMemory[i], "");
-        dataMemory[i][0] = -1;
-        dataMemory[i][1] = -1;
+        strcpy(instruction_memory[i], "");
+        data_memory[i][0] = -1;
+        data_memory[i][1] = -1;
     }
 }
 
@@ -78,13 +77,13 @@ void initMemory() {
 	@param dataFile: where the data are stored.
 	@return 1 if success, 0 otherwise.
 */
-int loadMemory(const char *instructionsFileName, const char *dataFileName) {
-    initMemory();
+int load_memory(const char *instructions_file_name, const char *data_file_name) {
+    init_memory();
 
-    if (!loadInstructions(instructionsFileName)) {
+    if (!load_instructions(instructions_file_name)) {
         return 0;
     }
-    if (!loadData(dataFileName)) {
+    if (!load_data(data_file_name)) {
         return 0;
     }
     return 1;
@@ -96,12 +95,12 @@ int loadMemory(const char *instructionsFileName, const char *dataFileName) {
  * @param address: where the value is stored
  * @return the value stored, 0 if not found
  */
-int indirectMemoryAccess(int address) {
+int indirect_memory_access(int address) {
     // run through memory of data
     for (int i = 0; i < MAX_LINES; i++) {
         // look for the address
-        if (dataMemory[i][0] == address) {
-            return dataMemory[i][1];
+        if (data_memory[i][0] == address) {
+            return data_memory[i][1];
         }
     }
     return -1;
@@ -113,20 +112,20 @@ int indirectMemoryAccess(int address) {
  * @param mar: the address of the new value
  * @param mbr: the new value
  */
-void updateMemory(int mar, int mbr) {
+void update_memory(int mar, int mbr) {
     // Look for existent address
     for (int i = 0; i < MAX_LINES; i++) {
-        if (dataMemory[i][0] == mar) {
-            dataMemory[i][1] = mbr;
+        if (data_memory[i][0] == mar) {
+            data_memory[i][1] = mbr;
             return;
         }
     }
     // If address is not in use, store it in the first free space of the array
     for (int i = 0; i < MAX_LINES; i++) {
         // Free spaces are identified by the default value -1
-        if(dataMemory[i][0] == -1) {
-            dataMemory[i][0] = mar;
-            dataMemory[i][1] = mbr;
+        if (data_memory[i][0] == -1) {
+            data_memory[i][0] = mar;
+            data_memory[i][1] = mbr;
             return;
         }
     }
@@ -139,13 +138,13 @@ void updateMemory(int mar, int mbr) {
  * @param mar: the address of the value
  * @param mbr: the value
  */
-void writeMemory(const char *dataMemoryFileName, const int mar, const int mbr) {
-    updateMemory(mar, mbr);
+void write_memory(const char *data_memory_file_name, int mar, int mbr) {
+    update_memory(mar, mbr);
 
-    size_t nameSize = strlen(dataMemoryFileName) + strlen("output-");
+    size_t nameSize = strlen(data_memory_file_name) + strlen("output-");
     char outName[nameSize];
     strcpy(outName, "output_");
-    strcat(outName, dataMemoryFileName);
+    strcat(outName, data_memory_file_name);
     FILE *file = fopen(outName, "w");
 
     if (file == NULL) {
@@ -155,8 +154,8 @@ void writeMemory(const char *dataMemoryFileName, const int mar, const int mbr) {
 
     // Goes through the array of data until a default index value or the end of array
     for (int i = 0; i < MAX_LINES; i++) {
-        if(dataMemory[i][0] != -1) {
-            fprintf(file, "%d %d\n", dataMemory[i][0], dataMemory[i][1]);
+        if (data_memory[i][0] != -1) {
+            fprintf(file, "%d %d\n", data_memory[i][0], data_memory[i][1]);
         }
     }
 

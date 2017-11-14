@@ -10,16 +10,20 @@ int main() {
 
     ir = NULL;
     cycles = 0;
+
 //    char *instructionsMemoryFileName = "instructions-memory_arithmetic.txt";
 //    char *dataMemoryFileName = "data-memory_arithmetic.txt";
 //    char *instructionsMemoryFileName = "instructions-memory_factorial.txt";
 //    char *dataMemoryFileName = "data-memory_factorial.txt";
-    char *instructionsMemoryFileName = "instructions-memory_fibonacci.txt";
-    char *dataMemoryFileName = "data-memory_fibonacci.txt";
+//    char *instructionsMemoryFileName = "instructions-memory_fibonacci.txt";
+//    char *dataMemoryFileName = "data-memory_fibonacci.txt";
 //    char *instructionsMemoryFileName = "instructions-memory_bubble-sort.txt";
 //    char *dataMemoryFileName = "data-memory_bubble-sort.txt";
 
-    if (!loadMemory(instructionsMemoryFileName, dataMemoryFileName)) {
+    char *instructionsMemoryFileName = "instructions-memory_matrix.txt";
+    char *dataMemoryFileName = "data-memory_matrix.txt";
+
+    if (!load_memory(instructionsMemoryFileName, dataMemoryFileName)) {
         puts("ERROR: Could not load memory");
         return 0;
     }
@@ -30,7 +34,7 @@ int main() {
     while (state != FINISH) {
         switch (state) {
             case FETCH:
-                ir = fetch(instructionMemory);
+                ir = fetch(instruction_memory);
                 if (ir == NULL) {
                     if (LOG) {
                         puts("End of instructions #");
@@ -52,7 +56,7 @@ int main() {
         }
     }
 
-    writeMemory(dataMemoryFileName, mar, mbr);
+    write_memory(dataMemoryFileName, mar, mbr);
     printf("Process finished with %d cycles.\n", cycles);
     return 0;
 }

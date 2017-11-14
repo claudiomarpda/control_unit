@@ -15,16 +15,16 @@
  *
  * @return an instruction as string
  */
-char *fetch(char instructionMemory[][INSTRUCTION_LENGTH]) {
+char *fetch(char instruction_memory[][INSTRUCTION_LENGTH]) {
 
     if (LOG) {
         printf("Fetching.... ");
     }
     // Check empty instruction
-    if (strcmp(instructionMemory[pc], "") == 0) {
+    if (strcmp(instruction_memory[pc], "") == 0) {
         return NULL;
     } else {
-        return instructionMemory[pc++];
+        return instruction_memory[pc++];
     }
 }
 
@@ -35,7 +35,7 @@ char *fetch(char instructionMemory[][INSTRUCTION_LENGTH]) {
  * @param token: must contain a register as the first string
  * @return the index found or -1 otherwise
  */
-int getRegisterIndex(const char *token) {
+int get_register_index(const char *token) {
     if (token[0] == 'R') {
         int operand = token[1] - '0'; // the number of the register
         return operand - 1; // decrements 1 to fit in the index of the registers
@@ -53,17 +53,17 @@ int getRegisterIndex(const char *token) {
  *
  * @param token: instruction with the operands
  */
-void decodeLoadOperation(const char *token) {
+void decode_load_operation(const char *token) {
     // Get the first operand, which must be a register
     token = strtok(NULL, " ");
-    operand1 = getRegisterIndex(token);
+    operand1 = get_register_index(token);
     token = strtok(NULL, " ");
 
     // Get the second operand
     // The value is in a register
     if (token[0] == 'R') {
         operation = LOAD_REGISTER;
-        operand2 = getRegisterIndex(token);
+        operand2 = get_register_index(token);
     }
         // The value is an address
     else {
@@ -81,11 +81,11 @@ void decodeLoadOperation(const char *token) {
  *
  * @param token: instruction with the operands
  */
-void decodeMoveOperation(const char *token) {
+void decode_move_operation(const char *token) {
 
     // Get the first operand, which must be a register
     token = strtok(NULL, " ");
-    operand1 = getRegisterIndex(token);
+    operand1 = get_register_index(token);
 
     // Get the second operand, which must be a value or a register
     token = strtok(NULL, " ");
@@ -110,11 +110,11 @@ void decodeMoveOperation(const char *token) {
  *
  * @param token: instruction with the operands
  */
-void decodeStoreOperation(const char *token) {
+void decode_store_operation(const char *token) {
 
     // Get the first operand, which must be a register
     token = strtok(NULL, " ");
-    operand1 = getRegisterIndex(token);
+    operand1 = get_register_index(token);
 
     // Get the second operand, which must be a value or a register
     token = strtok(NULL, " ");
@@ -138,15 +138,15 @@ void decodeStoreOperation(const char *token) {
  *
  * @param token: instruction with the operands
  */
-void decodeArithmeticOperation(const char *token) {
+void decode_arithmetic_operation(const char *token) {
 
     // Get the three registers
     token = strtok(NULL, " ");
-    operand1 = getRegisterIndex(token);
+    operand1 = get_register_index(token);
     token = strtok(NULL, " ");
-    operand2 = getRegisterIndex(token);
+    operand2 = get_register_index(token);
     token = strtok(NULL, " ");
-    operand3 = getRegisterIndex(token);
+    operand3 = get_register_index(token);
 
     if (LOG) {
         printf("Arithmetic with %d and %d; \t", reg[operand2], reg[operand3]);
@@ -164,7 +164,7 @@ void decodeArithmeticOperation(const char *token) {
  *
  * @param token: instruction with the value to be compared, and the index of the instruction
  */
-void decodeConditionalJumpOperation(const char *token) {
+void decode_conditional_jump_operation(const char *token) {
     operation = CONDITIONAL_JUMP;
     token = strtok(NULL, " ");
     // Value to be compared with the value of the register
@@ -182,7 +182,7 @@ void decodeConditionalJumpOperation(const char *token) {
  *
  * @param token: instruction with the index of the next instruction
  */
-void decodeUnconditionalJumpOperation(const char *token) {
+void decode_unconditional_jump_operation(const char *token) {
     operation = UNCONDITIONAL_JUMP;
     token = strtok(NULL, " ");
     // The index of the next instruction
@@ -194,7 +194,7 @@ void decodeUnconditionalJumpOperation(const char *token) {
  *
  * @param token: the instruction with the register
  */
-void decodeIncrementOperation(char *token) {
+void decode_increment_operation(char *token) {
     token = strtok(NULL, " ");
     // Counts the number of characters until it hits a '\n'
     size_t i = strcspn(token, "\n");
@@ -216,10 +216,10 @@ void decodeIncrementOperation(char *token) {
  *
  * @param token: instruction with two operands.
  */
-void decodeCompareOperation(const char *token) {
+void decode_compare_operation(const char *token) {
     token = strtok(NULL, " ");
     // The first register where the result will be stored
-    operand1 = getRegisterIndex(token);
+    operand1 = get_register_index(token);
 
     token = strtok(NULL, " ");
     // Get the second operand, which must be a value or a register
@@ -234,7 +234,6 @@ void decodeCompareOperation(const char *token) {
         operand2 = atoi(token);
     }
 }
-
 
 /**
  * Decodes the instruction and prepare the operands and registers to the execution state.
@@ -261,48 +260,48 @@ void decode(const char *instruction) {
     // Get the operation
     token = strtok(instructionCopy, " ");
     if (strcmp(token, "LOAD") == 0) {
-        decodeLoadOperation(token);
+        decode_load_operation(token);
 
     } else if (strcmp(token, "MOVE") == 0) {
-        decodeMoveOperation(token);
+        decode_move_operation(token);
 
     } else if (strcmp(token, "STORE") == 0) {
-        decodeStoreOperation(token);
+        decode_store_operation(token);
 
     } else if (strcmp(token, "ADD") == 0) {
         operation = ADD;
-        decodeArithmeticOperation(token);
+        decode_arithmetic_operation(token);
 
     } else if (strcmp(token, "SUBTRACT") == 0) {
         operation = SUBTRACT;
-        decodeArithmeticOperation(token);
+        decode_arithmetic_operation(token);
 
     } else if (strcmp(token, "MULTIPLY") == 0) {
         operation = MULTIPLY;
-        decodeArithmeticOperation(token);
+        decode_arithmetic_operation(token);
 
     } else if (strcmp(token, "DIVIDE") == 0) {
         operation = DIVIDE;
-        decodeArithmeticOperation(token);
+        decode_arithmetic_operation(token);
 
     } else if (strcmp(token, "JUMPc") == 0) {
 //        decodeJumpOperation(token);
-        decodeConditionalJumpOperation(token);
+        decode_conditional_jump_operation(token);
 
     } else if (strcmp(token, "JUMPu") == 0) {
 //        decodeJumpOperation(token);
-        decodeUnconditionalJumpOperation(token);
+        decode_unconditional_jump_operation(token);
 
     } else if (strcmp(token, "INCREMENT") == 0) {
         operation = INCREMENT;
-        decodeIncrementOperation(token);
+        decode_increment_operation(token);
 
     } else if (strcmp(token, "DECREMENT") == 0) {
         operation = DECREMENT;
-        decodeIncrementOperation(token);
+        decode_increment_operation(token);
 
     } else if (strcmp(token, "COMPARE") == 0) {
-        decodeCompareOperation(token);
+        decode_compare_operation(token);
     }
 }
 
@@ -322,7 +321,7 @@ void execute(const int operation) {
     switch (operation) {
         case LOAD_ADDRESS:
             mar = operand2;
-            mbr = indirectMemoryAccess(mar);
+            mbr = indirect_memory_access(mar);
             reg[operand1] = mbr;
             // Let's assume that every fetch in memory costs 4 cycles additionally
             cycles += 4;
@@ -332,7 +331,7 @@ void execute(const int operation) {
             break;
         case LOAD_REGISTER:
             mar = reg[operand2];
-            mbr = indirectMemoryAccess(mar);
+            mbr = indirect_memory_access(mar);
             reg[operand1] = mbr;
             // Let's assume that every fetch in memory costs 4 cycles additionally
             cycles += 4;
@@ -355,7 +354,7 @@ void execute(const int operation) {
         case STORE_REGISTER:
             mar = reg[operand2];
             mbr = reg[operand1];
-            updateMemory(mar, mbr);
+            update_memory(mar, mbr);
             if (LOG) {
                 printf("Store %d from R%d at %d\n\n", reg[operand1], operand1 + 1, reg[operand2]);
             }
@@ -363,7 +362,7 @@ void execute(const int operation) {
         case STORE_CONST:
             mar = operand2;
             mbr = reg[operand1];
-            updateMemory(mar, mbr);
+            update_memory(mar, mbr);
             if (LOG) {
                 printf("Store %d from R%d at %d\n\n", reg[operand1], operand1 + 1, operand2);
             }
