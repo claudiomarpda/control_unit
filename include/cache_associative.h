@@ -3,7 +3,7 @@
 //
 /*
  * Implements associative mapping for the cache memory.
- * Functions starts with acm (Associative Cache Memory)
+ * Functions starts with acm_ (Associative Cache Memory)
  * */
 
 #ifndef CONTROL_UNIT_CACHE_ASSOCIATIVE_H
@@ -21,11 +21,9 @@ int next_data_index;
 
 // Cache for instructions
 instruction_cache_t *acm_instructions;
-//instruction_cache_t acm_instructions[cache_lines];
 
 // Cache for data
 data_cache_t *acm_data;
-//data_cache_t acm_data[cache_lines];
 
 
 /**
@@ -74,11 +72,11 @@ void acm_write_data(int main_memory_address, int data);
 
 
 /**
- * Increments the index and limits it so it will be at most the CACHE_LINES value.
+ * Increments the index and limits it so it will be at most the size of the cache.
  *
  * @param index: the integer variable to be incremented
  */
-void acm_increment_next_index(int *index);
+void acm_increment_next_index(int *const index);
 
 /**
  * Initiates the cache with appropriated values

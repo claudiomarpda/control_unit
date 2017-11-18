@@ -31,7 +31,7 @@ int acm_read_data(int cache_index) {
     return acm_data[cache_index].data;
 }
 
-void acm_increment_next_index(int *index) {
+void acm_increment_next_index(int *const index) {
     *index = (*index + 1) % cache_lines;
 }
 

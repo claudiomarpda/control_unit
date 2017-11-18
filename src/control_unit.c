@@ -65,7 +65,7 @@ char *fetch(char instruction_memory[][INSTRUCTION_LENGTH]) {
  * @param token: must contain a register as the first string
  * @return the index found or -1 otherwise
  */
-int get_register_index(const char *token) {
+static int get_register_index(const char *token) {
     if (token[0] == 'R') {
         int operand = token[1] - '0'; // the number of the register
         return operand - 1; // decrements 1 to fit in the index of the registers
@@ -83,7 +83,7 @@ int get_register_index(const char *token) {
  *
  * @param token: instruction with the operands
  */
-void decode_load_operation(const char *token) {
+static void decode_load_operation(const char *token) {
     // Get the first operand, which must be a register
     token = strtok(NULL, " ");
     operand1 = get_register_index(token);
@@ -111,7 +111,7 @@ void decode_load_operation(const char *token) {
  *
  * @param token: instruction with the operands
  */
-void decode_move_operation(const char *token) {
+static void decode_move_operation(const char *token) {
 
     // Get the first operand, which must be a register
     token = strtok(NULL, " ");
@@ -140,7 +140,7 @@ void decode_move_operation(const char *token) {
  *
  * @param token: instruction with the operands
  */
-void decode_store_operation(const char *token) {
+static void decode_store_operation(const char *token) {
 
     // Get the first operand, which must be a register
     token = strtok(NULL, " ");
@@ -168,7 +168,7 @@ void decode_store_operation(const char *token) {
  *
  * @param token: instruction with the operands
  */
-void decode_arithmetic_operation(const char *token) {
+static void decode_arithmetic_operation(const char *token) {
 
     // Get the three registers
     token = strtok(NULL, " ");
@@ -194,7 +194,7 @@ void decode_arithmetic_operation(const char *token) {
  *
  * @param token: instruction with the value to be compared, and the index of the instruction
  */
-void decode_conditional_jump_operation(const char *token) {
+static void decode_conditional_jump_operation(const char *token) {
     operation = CONDITIONAL_JUMP;
     token = strtok(NULL, " ");
     // Value to be compared with the value of the register
@@ -212,7 +212,7 @@ void decode_conditional_jump_operation(const char *token) {
  *
  * @param token: instruction with the index of the next instruction
  */
-void decode_unconditional_jump_operation(const char *token) {
+static void decode_unconditional_jump_operation(const char *token) {
     operation = UNCONDITIONAL_JUMP;
     token = strtok(NULL, " ");
     // The index of the next instruction
@@ -224,7 +224,7 @@ void decode_unconditional_jump_operation(const char *token) {
  *
  * @param token: the instruction with the register
  */
-void decode_increment_operation(char *token) {
+static void decode_increment_operation(char *token) {
     token = strtok(NULL, " ");
     // Counts the number of characters until it hits a '\n'
     size_t i = strcspn(token, "\n");
@@ -246,7 +246,7 @@ void decode_increment_operation(char *token) {
  *
  * @param token: instruction with two operands.
  */
-void decode_compare_operation(const char *token) {
+static void decode_compare_operation(const char *token) {
     token = strtok(NULL, " ");
     // The first register where the result will be stored
     operand1 = get_register_index(token);
@@ -501,7 +501,7 @@ void init_control_unit() {
     cycles = 0;
 }
 
-int find_data_in_address(int mar) {
+static int find_data_in_address(int mar) {
     int index = acm_data_address_exist(mar);
     if (index >= 0) {
         // The address exists in cache

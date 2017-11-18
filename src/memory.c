@@ -12,7 +12,7 @@
 
 	@return 1 if success, 0 otherwise
 */
-int load_instructions(const char *file_name) {
+static int load_instructions(const char *file_name) {
     FILE *file = fopen(file_name, "r");
 
     if (file == NULL) {
@@ -37,7 +37,7 @@ int load_instructions(const char *file_name) {
 
 	@return 1 if success, 0 otherwise
 */
-int load_data(const char *file_name) {
+static int load_data(const char *file_name) {
     FILE *file = fopen(file_name, "r");
 
     if (file == NULL) {
@@ -62,7 +62,7 @@ int load_data(const char *file_name) {
 /**
  * Initiates default values.
  */
-void init_memory() {
+static void init_memory() {
     for (int i = 0; i < MAX_LINES; i++) {
         strcpy(instruction_memory[i], "");
         data_memory[i][0] = -1;

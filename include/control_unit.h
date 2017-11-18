@@ -33,13 +33,13 @@ int pc;
 // Instruction register keeps an instruction in string format
 char *ir;
 // Registers load data from memory and are used to do arithmetic operations
-int reg[9];
+static int reg[9];
 // Memory Bus Register
 int mbr;
 // Memory Access Register
 int mar;
 // Comparison Register stores the result of the last compare operation
-int rc;
+static int rc;
 
 /*
  * Operands identifiers. Handles three operand at most at a time.
@@ -47,7 +47,7 @@ int rc;
  * For memory access, it will receive an address.
  * For constants, it will receive a constant value.
  */
-int operand1, operand2, operand3;
+static int operand1, operand2, operand3;
 
 int cycles;
 
@@ -65,7 +65,7 @@ char *fetch(char instruction_memory[][INSTRUCTION_LENGTH]);
  * @param token: must contain a register as the first string
  * @return the index found or -1 otherwise
  */
-int get_register_index(const char *token);
+static int get_register_index(const char *token);
 
 /**
  * Load in the register the value from the address.
@@ -77,7 +77,7 @@ int get_register_index(const char *token);
  *
  * @param token: instruction with the operands
  */
-void decode_load_operation(const char *token);
+static void decode_load_operation(const char *token);
 
 /**
  * Move to the first register the value of the right-side operand, which can be a register or a constant.
@@ -88,7 +88,7 @@ void decode_load_operation(const char *token);
  *
  * @param token: instruction with the operands
  */
-void decode_move_operation(const char *token);
+static void decode_move_operation(const char *token);
 
 /**
  * Store the value of the register in the address. The address can be a constant or a register value.
@@ -99,7 +99,7 @@ void decode_move_operation(const char *token);
  *
  * @param token: instruction with the operands
  */
-void decode_store_operation(const char *token);
+static void decode_store_operation(const char *token);
 
 /**
  * Do arithmetic with the two right-side operands and assign the result to the first register.
@@ -109,7 +109,7 @@ void decode_store_operation(const char *token);
  *
  * @param token: instruction with the operands
  */
-void decode_arithmetic_operation(const char *token);
+static void decode_arithmetic_operation(const char *token);
 
 /**
  * Decodes the instruction to jump to an index of the instruction memory.
@@ -122,7 +122,7 @@ void decode_arithmetic_operation(const char *token);
  *
  * @param token: instruction with the value to be compared, and the index of the instruction
  */
-void decode_conditional_jump_operation(const char *token);
+static void decode_conditional_jump_operation(const char *token);
 
 /**
  * Decodes unconditional jump operation.
@@ -132,14 +132,14 @@ void decode_conditional_jump_operation(const char *token);
  *
  * @param token: instruction with the index of the next instruction
  */
-void decode_unconditional_jump_operation(const char *token);
+static void decode_unconditional_jump_operation(const char *token);
 
 /**
  * Decodes the instruction to increment 1 to the value of a register.
  *
  * @param token: the instruction with the register
  */
-void decode_increment_operation(char *token);
+static void decode_increment_operation(char *token);
 
 /**
  * Decodes the comparison of two operands and stores it in the comparison register.
@@ -152,7 +152,7 @@ void decode_increment_operation(char *token);
  *
  * @param token: instruction with two operands.
  */
-void decode_compare_operation(const char *token);
+static void decode_compare_operation(const char *token);
 
 /**
  * Decodes the instruction and prepare the operands and registers to the execution state.
@@ -173,6 +173,6 @@ void init_control_unit();
 /**
  * Finds the data in the cache or in the memory
  */
-int find_data_in_address(int mar);
+static int find_data_in_address(int mar);
 
 #endif //CONTROLUNIT_CONTROL_UNIT_H

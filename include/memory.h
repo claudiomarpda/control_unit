@@ -17,7 +17,7 @@ int data_memory[MAX_LINES][2];
 
 	@return 1 if success, 0 otherwise
 */
-int load_instructions(const char *file_name);
+static int load_instructions(const char *file_name);
 
 /**
 	Loads the data into the memory. Each line of data contains an index and a value.
@@ -26,7 +26,7 @@ int load_instructions(const char *file_name);
 
 	@return 1 if success, 0 otherwise
 */
-int load_data(const char *file_name);
+static int load_data(const char *file_name);
 
 /**
 	Loads the instructions and data into the memory.
@@ -40,7 +40,7 @@ int load_memory(const char *instructions_file_name, const char *data_file_name);
 /**
  * Initiates default values.
  */
-void init_memory();
+static void init_memory();
 
 /**
  * Gets a value from an address of memory data.

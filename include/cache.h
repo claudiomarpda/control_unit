@@ -4,7 +4,7 @@
 #ifndef CONTROL_UNIT_CACHE_H
 #define CONTROL_UNIT_CACHE_H
 
-// To be defined by the user
+// Size of the cache to be defined by the user
 int cache_lines;
 
 typedef struct {
