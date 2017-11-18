@@ -23,14 +23,10 @@ enum operations {
     COMPARE_REGISTER, COMPARE_CONST
 };
 
-enum mappings {ASSOCIATIVE, DIRECT};
-
 // The current state of the instruction cycle
 enum states state;
 // The current operation
 enum operations operation;
-// The type of mapping for memory cache
-enum mappings cache_mapping;
 
 // Program counter points to the index of the next instruction of the memory
 int pc;
@@ -56,6 +52,8 @@ static int operand1, operand2, operand3;
 // Number of cycles for CPU clock when accessing main memory and cache memory
 int cycles;
 
+int cache_miss;
+int cache_hit;
 
 /**
  * Fetches the next instruction which the program counter is pointing to.
@@ -180,5 +178,6 @@ void init_control_unit();
  * Finds the data in the cache or in the memory
  */
 static int find_data_in_address(int mar);
+
 
 #endif //CONTROLUNIT_CONTROL_UNIT_H

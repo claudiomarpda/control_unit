@@ -5,8 +5,7 @@
 #include "../include/control_unit.h"
 #include "../include/memory.h"
 #include "../include/arithmetic_logic_unit.h"
-#include "../include/cache_associative.h"
-#include "../include/cache_direct.h"
+#include "../include/cache_strategy.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,15 +30,7 @@ char *fetch(char **instruction_memory) {
     char *instruction = NULL;
 
     // Check if the instruction is in the cache
-
-    switch (cache_mapping) {
-        case ASSOCIATIVE:
-            index = acm_instruction_exists(pc);
-            break;
-        case DIRECT:
-            index = dcm_instruction_exists(pc);
-            break;
-    }
+    index = cache_instruction_exists(pc);
 
     if (index >= 0) {
         // Is in the cache
@@ -49,15 +40,9 @@ char *fetch(char **instruction_memory) {
 
         // Loading instruction from main memory costs 3 cycles
         cycles += 3;
+        cache_hit++;
 
-        switch (cache_mapping) {
-            case ASSOCIATIVE:
-                instruction = acm_read_instruction(index);
-                break;
-            case DIRECT:
-                instruction = dcm_read_instruction(index);
-                break;
-        }
+        instruction = cache_read_instruction(index);
 
     } else {
         // Is not in the cache
@@ -67,18 +52,13 @@ char *fetch(char **instruction_memory) {
 
         // Loading instruction from main memory costs 239 cycles
         cycles += 239;
+        cache_miss++;
 
+        // Get instruction from main memory
         instruction = instruction_memory[pc];
 
         // Save it in the cache
-        switch (cache_mapping) {
-            case ASSOCIATIVE:
-                acm_write_instruction(pc, instruction);
-                break;
-            case DIRECT:
-                dcm_write_instruction(pc, instruction);
-                break;
-        }
+        cache_write_instruction(pc, instruction);
     }
 
     // Points to the next instruction
@@ -379,32 +359,7 @@ void execute(const int operation) {
     switch (operation) {
         case LOAD_ADDRESS:
             mar = operand2;
-            /*int index = amc_data_address_exist(mar);
-            if(index >= 0) {
-                // The address exists in cache
-                if (LOG) {
-                    printf("Cache HIT: ");
-                }
-                // Read data from cache
-                mbr = amc_read_data(index);
-                // Loading data from cache costs 3 cycle
-                cycles += 3;
-            }
-            else {
-                // The address is not in the cache
-                if (LOG) {
-                    printf("Cache MISS: ");
-                }
-
-                // Read data from main memory
-                mbr = indirect_memory_access(mar);
-                amc_write_data(mar, mbr);
-                // Loading data from main memory costs 239 cycle
-                cycles += 239;
-            }*/
-
             mbr = find_data_in_address(mar);
-
             reg[operand1] = mbr;
             if (LOG) {
                 printf("R%d = %d from address %d\n\n", operand1 + 1, reg[operand1], operand2);
@@ -412,9 +367,7 @@ void execute(const int operation) {
             break;
         case LOAD_REGISTER:
             mar = reg[operand2];
-//            mbr = indirect_memory_access(mar);
             mbr = find_data_in_address(mar);
-//            cycles += 239;
             reg[operand1] = mbr;
             if (LOG) {
                 printf("R%d = %d from address %d\n\n", operand1 + 1, reg[operand1], reg[operand2]);
@@ -527,21 +480,14 @@ void execute(const int operation) {
 void init_control_unit() {
     ir = NULL;
     cycles = 0;
+    cache_hit = 0;
+    cache_miss = 0;
 }
 
 static int find_data_in_address(int mar) {
 
-    int index = -1;
     int data = 0;
-
-    switch (cache_mapping) {
-        case ASSOCIATIVE:
-            index = acm_data_address_exist(mar);
-            break;
-        case DIRECT:
-            index = dcm_data_address_exist(mar);
-            break;
-    }
+    int index = cache_data_address_exist(mar);
 
     if (index >= 0) {
         // The address exists in cache
@@ -550,17 +496,11 @@ static int find_data_in_address(int mar) {
         }
         // Loading data from cache costs 3 cycles
         cycles += 3;
+        cache_hit++;
 
         // Read data from cache
+        data = cache_read_data(index);
 
-        switch (cache_mapping) {
-            case ASSOCIATIVE:
-                data = acm_read_data(index);
-                break;
-            case DIRECT:
-                data = dcm_read_data(index);
-                break;
-        }
     } else {
         // The address is not in the cache
         // Searches at the main memory
@@ -571,20 +511,14 @@ static int find_data_in_address(int mar) {
 
         // Loading data from main memory costs 239 cycles
         cycles += 239;
+        cache_miss++;
 
         // Read data from main memory
         data = indirect_memory_access(mar);
 
         // Update cache
+        cache_write_data(mar, data);
 
-        switch (cache_mapping) {
-            case ASSOCIATIVE:
-                acm_write_data(mar, data);
-                break;
-            case DIRECT:
-                dcm_write_data(mar, data);
-                break;
-        }
     }
     return data;
 }

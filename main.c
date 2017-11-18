@@ -2,8 +2,7 @@
 
 #include "include/memory.h"
 #include "include/control_unit.h"
-#include "include/cache_associative.h"
-#include "include/cache_direct.h"
+#include "include/cache_strategy.h"
 
 char *instructions_memory_file_name = NULL;
 char *data_memory_file_name = NULL;
@@ -73,44 +72,48 @@ int main() {
 
     // Choose program
     int program_number = 4;
-    // Choose program
+    // Choose memory size
     int memory_size = 100;
-    // Choose cache size
-    int cache_size = 10;
-    // Choose mapping type
-    cache_mapping = ASSOCIATIVE;
 
-    init_control_unit();
+    int total_hits[9];
+    int total_misses[9];
 
-    switch(cache_mapping) {
-        case ASSOCIATIVE:
-            acm_init(cache_size);
-            break;
-        case DIRECT:
-            dcm_init(cache_size);
-            break;
+    int k = 2;
+    for (int i = 0; i < 9; i++) {
+        init_control_unit();
+        // Set cache size
+        int cache_size = k;
+        cache_init(DIRECT, cache_size);
+
+        // Run the same program several times
+        for (int j = 0; j < 5; j++) {
+            run(program_number, memory_size);
+            pc = 0;
+        }
+
+        write_data_memory(data_memory_file_name, mar, mbr);
+
+        printf("Process finished with %d cycles.\n", cycles);
+        printf("Cache hits: %d\n", cache_hit);
+        printf("Cache misses: %d\n", cache_miss);
+
+        cache_finish();
+        memo_finish();
+
+        total_hits[i] = cache_hit;
+        total_misses[i] = cache_miss;
+
+        // 2 4 8 16 32 64 128
+        k = k * 2;
     }
 
-    // Run the same program several times
-    for (int i = 0; i < 5; i++) {
-        run(program_number, memory_size);
-        pc = 0;
+    putchar('\n');
+    for(int i = 0; i < 9; i ++){
+        printf("Cache size: 2^%d\n", i + 1);
+        printf("Total hits: %d\n", total_hits[i]);
+        printf("Total misses: %d\n\n", total_misses[i]);
     }
 
-    write_data_memory(data_memory_file_name, mar, mbr);
-    printf("Process finished with %d cycles.\n", cycles);
-
-    // Release resources
-    switch(cache_mapping) {
-        case ASSOCIATIVE:
-            acm_finish();
-            break;
-        case DIRECT:
-            dcm_finish();
-            break;
-    }
-
-    memo_finish();
 
     return 0;
 }
