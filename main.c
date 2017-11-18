@@ -3,6 +3,7 @@
 #include "include/memory.h"
 #include "include/control_unit.h"
 #include "include/cache_associative.h"
+#include "include/cache_direct.h"
 
 char *instructions_memory_file_name = NULL;
 char *data_memory_file_name = NULL;
@@ -74,11 +75,25 @@ void run(int program_number) {
  */
 int main() {
 
-    init_control_unit();
-    acm_init(10);
-
+    // Choose program
     int program_number = 5;
+    // Choose cache size
+    int cache_size = 10;
+    // Choose mapping type
+    cache_mapping = ASSOCIATIVE;
 
+    init_control_unit();
+
+    switch(cache_mapping) {
+        case ASSOCIATIVE:
+            acm_init(cache_size);
+            break;
+        case DIRECT:
+            dcm_init(cache_size);
+            break;
+    }
+
+    // Run the same program several times
     for (int i = 0; i < 5; i++) {
         run(program_number);
         pc = 0;
@@ -87,7 +102,15 @@ int main() {
     write_data_memory(data_memory_file_name, mar, mbr);
     printf("Process finished with %d cycles.\n", cycles);
 
-    acm_finish();
+    // Release resources
+    switch(cache_mapping) {
+        case ASSOCIATIVE:
+            acm_finish();
+            break;
+        case DIRECT:
+            dcm_finish();
+            break;
+    }
 
     return 0;
 }

@@ -4,6 +4,8 @@
 #ifndef CONTROL_UNIT_CACHE_H
 #define CONTROL_UNIT_CACHE_H
 
+#include "memory.h"
+
 // Size of the cache to be defined by the user
 int cache_lines;
 

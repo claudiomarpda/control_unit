@@ -6,6 +6,7 @@
 #include "../include/memory.h"
 #include "../include/arithmetic_logic_unit.h"
 #include "../include/cache_associative.h"
+#include "../include/cache_direct.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,8 +27,20 @@ char *fetch(char instruction_memory[][INSTRUCTION_LENGTH]) {
         return NULL;
     }
 
+    int index = -1;
+    char *instruction = NULL;
+
     // Check if the instruction is in the cache
-    int index = acm_instruction_exists(pc);
+
+    switch (cache_mapping) {
+        case ASSOCIATIVE:
+            index = acm_instruction_exists(pc);
+            break;
+        case DIRECT:
+            index = dcm_instruction_exists(pc);
+            break;
+    }
+
     if (index >= 0) {
         // Is in the cache
         if (LOG) {
@@ -37,22 +50,37 @@ char *fetch(char instruction_memory[][INSTRUCTION_LENGTH]) {
         // Loading instruction from main memory costs 3 cycles
         cycles += 3;
 
-        // Points to the next instruction
-        pc++;
-        return acm_read_instruction(index);
+        switch (cache_mapping) {
+            case ASSOCIATIVE:
+                instruction = acm_read_instruction(index);
+                break;
+            case DIRECT:
+                instruction = dcm_read_instruction(index);
+                break;
+        }
+
+    } else {
+        // Is not in the cache
+        if (LOG) {
+            printf("Instruction Cache MISS: ");
+        }
+
+        // Loading instruction from main memory costs 239 cycles
+        cycles += 239;
+
+        instruction = instruction_memory[pc];
+
+        // Save it in the cache
+        switch (cache_mapping) {
+            case ASSOCIATIVE:
+                acm_write_instruction(pc, instruction);
+                break;
+            case DIRECT:
+                dcm_write_instruction(pc, instruction);
+                break;
+        }
     }
 
-    // Is not in the cache
-    if (LOG) {
-        printf("Instruction Cache MISS: ");
-    }
-
-    // Loading instruction from main memory costs 239 cycles
-    cycles += 239;
-
-    char *instruction = instruction_memory[pc];
-    // Save it in the cache
-    acm_write_instruction(pc, instruction);
     // Points to the next instruction
     pc++;
     return instruction;
@@ -502,7 +530,19 @@ void init_control_unit() {
 }
 
 static int find_data_in_address(int mar) {
-    int index = acm_data_address_exist(mar);
+
+    int index = -1;
+    int data = 0;
+
+    switch (cache_mapping) {
+        case ASSOCIATIVE:
+            index = acm_data_address_exist(mar);
+            break;
+        case DIRECT:
+            index = dcm_data_address_exist(mar);
+            break;
+    }
+
     if (index >= 0) {
         // The address exists in cache
         if (LOG) {
@@ -510,20 +550,41 @@ static int find_data_in_address(int mar) {
         }
         // Loading data from cache costs 3 cycles
         cycles += 3;
+
         // Read data from cache
-        return acm_read_data(index);
+
+        switch (cache_mapping) {
+            case ASSOCIATIVE:
+                data = acm_read_data(index);
+                break;
+            case DIRECT:
+                data = dcm_read_data(index);
+                break;
+        }
+    } else {
+        // The address is not in the cache
+        // Searches at the main memory
+
+        if (LOG) {
+            printf("Data Cache MISS: ");
+        }
+
+        // Loading data from main memory costs 239 cycles
+        cycles += 239;
+
+        // Read data from main memory
+        data = indirect_memory_access(mar);
+
+        // Update cache
+
+        switch (cache_mapping) {
+            case ASSOCIATIVE:
+                acm_write_data(mar, data);
+                break;
+            case DIRECT:
+                dcm_write_data(mar, data);
+                break;
+        }
     }
-
-    // The address is not in the cache
-    if (LOG) {
-        printf("Data Cache MISS: ");
-    }
-
-    // Loading data from main memory costs 239 cycles
-    cycles += 239;
-
-    // Read data from main memory
-    int mbr = indirect_memory_access(mar);
-    acm_write_data(mar, mbr);
-    return mbr;
+    return data;
 }
