@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <malloc.h>
 
 /**
 	Loads the instructions into the memory. File must end with an empty line.
@@ -60,25 +61,14 @@ static int load_data(const char *file_name) {
 }
 
 /**
- * Initiates default values.
- */
-static void init_memory() {
-    for (int i = 0; i < MAX_LINES; i++) {
-        strcpy(instruction_memory[i], "");
-        data_memory[i][0] = -1;
-        data_memory[i][1] = -1;
-    }
-}
-
-/**
 	Loads the instructions and data into the memory.
 
 	@param instructionsFile: where the instructions are stored.
 	@param dataFile: where the data are stored.
 	@return 1 if success, 0 otherwise.
 */
-int load_memory(const char *instructions_file_name, const char *data_file_name) {
-    init_memory();
+int load_memory(int memory_size, const char *instructions_file_name, const char *data_file_name) {
+    memo_allocate(memory_size);
 
     if (!load_instructions(instructions_file_name)) {
         return 0;
@@ -97,7 +87,7 @@ int load_memory(const char *instructions_file_name, const char *data_file_name) 
  */
 int indirect_memory_access(int address) {
     // run through memory of data
-    for (int i = 0; i < MAX_LINES; i++) {
+    for (int i = 0; i < MEMORY_LINES; i++) {
         // look for the address
         if (data_memory[i][0] == address) {
             return data_memory[i][1];
@@ -114,14 +104,14 @@ int indirect_memory_access(int address) {
  */
 void update_memory(int mar, int mbr) {
     // Look for existent address
-    for (int i = 0; i < MAX_LINES; i++) {
+    for (int i = 0; i < MEMORY_LINES; i++) {
         if (data_memory[i][0] == mar) {
             data_memory[i][1] = mbr;
             return;
         }
     }
     // If address is not in use, store it in the first free space of the array
-    for (int i = 0; i < MAX_LINES; i++) {
+    for (int i = 0; i < MEMORY_LINES; i++) {
         // Free spaces are identified by the default value -1
         if (data_memory[i][0] == -1) {
             data_memory[i][0] = mar;
@@ -153,11 +143,40 @@ void write_data_memory(const char *data_memory_file_name, int mar, int mbr) {
     }
 
     // Goes through the array of data until a default index value or the end of array
-    for (int i = 0; i < MAX_LINES; i++) {
+    for (int i = 0; i < MEMORY_LINES; i++) {
         if (data_memory[i][0] != -1) {
             fprintf(file, "%d %d\n", data_memory[i][0], data_memory[i][1]);
         }
     }
 
     fclose(file);
+}
+
+static void memo_allocate(int memory_size) {
+
+    memo_lines = memory_size;
+
+    instruction_memory = malloc(sizeof(char *) * memory_size);
+    data_memory = malloc(sizeof(int *) * memory_size);
+
+    for (int i = 0; i < memo_lines; i++) {
+        instruction_memory[i] = malloc(INSTRUCTION_LENGTH);
+        data_memory[i] = malloc(sizeof(int) * 2);
+
+        // Initiate start values
+        strcpy(instruction_memory[i], "");
+        data_memory[i][0] = -1;
+        data_memory[i][1] = -1;
+    }
+}
+
+void memo_finish() {
+
+    for (int i = 0; i < memo_lines; i++) {
+        free(instruction_memory[i]);
+        free(data_memory[i]);
+    }
+
+    free(instruction_memory);
+    free(data_memory);
 }

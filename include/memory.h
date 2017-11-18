@@ -5,12 +5,14 @@
 #ifndef CONTROLUNIT_MEMORY_H
 #define CONTROLUNIT_MEMORY_H
 
-#define MAX_LINES 100
+int memo_lines;
+#define MEMORY_LINES 100
 #define INSTRUCTION_LENGTH 100
 
 // Global variables
-char instruction_memory[MAX_LINES][INSTRUCTION_LENGTH];
-int data_memory[MAX_LINES][2];
+char **instruction_memory;
+int **data_memory;
+
 
 /**
 	Loads the instructions into the memory. File must end with an empty line.
@@ -35,12 +37,7 @@ static int load_data(const char *file_name);
 	@param dataFile: where the data are stored.
 	@return 1 if success, 0 otherwise.
 */
-int load_memory(const char *instructions_file_name, const char *data_file_name);
-
-/**
- * Initiates default values.
- */
-static void init_memory();
+int load_memory(int memory_size, const char *instructions_file_name, const char *data_file_name);
 
 /**
  * Gets a value from an address of memory data.
@@ -66,5 +63,18 @@ void update_memory(int mar, int mbr);
  * @param mbr: the value
  */
 void write_data_memory(const char *data_memory_file_name, int mar, int mbr);
+
+/**
+ * Allocate memory dynamically ir order to let user choose the size of the memory
+ *
+ * @param memory_size
+ */
+static void memo_allocate(int memory_size);
+
+/**
+ * Deallocate memory
+ */
+void memo_finish();
+
 
 #endif //CONTROLUNIT_MEMORY_H

@@ -17,7 +17,7 @@
  *
  * @return an instruction as string
  */
-char *fetch(char instruction_memory[][INSTRUCTION_LENGTH]) {
+char *fetch(char **instruction_memory) {
 
     if (LOG) {
         printf("Fetching.... ");

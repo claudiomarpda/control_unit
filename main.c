@@ -8,7 +8,7 @@
 char *instructions_memory_file_name = NULL;
 char *data_memory_file_name = NULL;
 
-void run(int program_number) {
+void run(int program_number, int memory_size) {
 
     switch (program_number) {
         case 1:
@@ -16,18 +16,14 @@ void run(int program_number) {
             data_memory_file_name = "data-memory_arithmetic.txt";
             break;
         case 2:
-            instructions_memory_file_name = "instructions-memory_factorial.txt";
-            data_memory_file_name = "data-memory_factorial.txt";
-            break;
-        case 3:
             instructions_memory_file_name = "instructions-memory_fibonacci.txt";
             data_memory_file_name = "data-memory_fibonacci.txt";
             break;
-        case 4:
+        case 3:
             instructions_memory_file_name = "instructions-memory_bubble-sort.txt";
             data_memory_file_name = "data-memory_bubble-sort.txt";
             break;
-        case 5:
+        case 4:
             instructions_memory_file_name = "instructions-memory_matrix.txt";
             data_memory_file_name = "data-memory_matrix.txt";
             break;
@@ -35,7 +31,7 @@ void run(int program_number) {
             break;
     }
 
-    if (!load_memory(instructions_memory_file_name, data_memory_file_name)) {
+    if (!load_memory(memory_size, instructions_memory_file_name, data_memory_file_name)) {
         puts("ERROR: Could not load memory");
         return;
     }
@@ -76,7 +72,9 @@ void run(int program_number) {
 int main() {
 
     // Choose program
-    int program_number = 5;
+    int program_number = 4;
+    // Choose program
+    int memory_size = 100;
     // Choose cache size
     int cache_size = 10;
     // Choose mapping type
@@ -95,7 +93,7 @@ int main() {
 
     // Run the same program several times
     for (int i = 0; i < 5; i++) {
-        run(program_number);
+        run(program_number, memory_size);
         pc = 0;
     }
 
@@ -111,6 +109,8 @@ int main() {
             dcm_finish();
             break;
     }
+
+    memo_finish();
 
     return 0;
 }

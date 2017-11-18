@@ -62,7 +62,7 @@ int cycles;
  *
  * @return an instruction as string
  */
-char *fetch(char instruction_memory[][INSTRUCTION_LENGTH]);
+char *fetch(char **instruction_memory);
 
 /**
  * Extracts the index of the register from an instruction.
