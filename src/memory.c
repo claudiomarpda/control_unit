@@ -138,7 +138,7 @@ void update_memory(int mar, int mbr) {
  * @param mar: the address of the value
  * @param mbr: the value
  */
-void write_memory(const char *data_memory_file_name, int mar, int mbr) {
+void write_data_memory(const char *data_memory_file_name, int mar, int mbr) {
     update_memory(mar, mbr);
 
     size_t nameSize = strlen(data_memory_file_name) + strlen("output-");

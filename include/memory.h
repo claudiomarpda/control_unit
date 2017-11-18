@@ -65,6 +65,6 @@ void update_memory(int mar, int mbr);
  * @param mar: the address of the value
  * @param mbr: the value
  */
-void write_memory(const char *data_memory_file_name, int mar, int mbr);
+void write_data_memory(const char *data_memory_file_name, int mar, int mbr);
 
 #endif //CONTROLUNIT_MEMORY_H

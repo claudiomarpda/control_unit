@@ -2,30 +2,41 @@
 
 #include "include/memory.h"
 #include "include/control_unit.h"
+#include "include/cache_associative.h"
 
-/**
- * Reads instructions and data from memory and handles the instruction cycle until the end of the instructions.
- */
-int main() {
+char *instructions_memory_file_name = NULL;
+char *data_memory_file_name = NULL;
 
-    ir = NULL;
-    cycles = 0;
+void run(int program_number) {
 
-//    char *instructionsMemoryFileName = "instructions-memory_arithmetic.txt";
-//    char *dataMemoryFileName = "data-memory_arithmetic.txt";
-//    char *instructionsMemoryFileName = "instructions-memory_factorial.txt";
-//    char *dataMemoryFileName = "data-memory_factorial.txt";
-//    char *instructionsMemoryFileName = "instructions-memory_fibonacci.txt";
-//    char *dataMemoryFileName = "data-memory_fibonacci.txt";
-//    char *instructionsMemoryFileName = "instructions-memory_bubble-sort.txt";
-//    char *dataMemoryFileName = "data-memory_bubble-sort.txt";
+    switch (program_number) {
+        case 1:
+            instructions_memory_file_name = "instructions-memory_arithmetic.txt";
+            data_memory_file_name = "data-memory_arithmetic.txt";
+            break;
+        case 2:
+            instructions_memory_file_name = "instructions-memory_factorial.txt";
+            data_memory_file_name = "data-memory_factorial.txt";
+            break;
+        case 3:
+            instructions_memory_file_name = "instructions-memory_fibonacci.txt";
+            data_memory_file_name = "data-memory_fibonacci.txt";
+            break;
+        case 4:
+            instructions_memory_file_name = "instructions-memory_bubble-sort.txt";
+            data_memory_file_name = "data-memory_bubble-sort.txt";
+            break;
+        case 5:
+            instructions_memory_file_name = "instructions-memory_matrix.txt";
+            data_memory_file_name = "data-memory_matrix.txt";
+            break;
+        default:
+            break;
+    }
 
-    char *instructionsMemoryFileName = "instructions-memory_matrix.txt";
-    char *dataMemoryFileName = "data-memory_matrix.txt";
-
-    if (!load_memory(instructionsMemoryFileName, dataMemoryFileName)) {
+    if (!load_memory(instructions_memory_file_name, data_memory_file_name)) {
         puts("ERROR: Could not load memory");
-        return 0;
+        return;
     }
 
     state = FETCH;
@@ -39,7 +50,7 @@ int main() {
                     if (LOG) {
                         puts("End of instructions #");
                     }
-                    // There is no more instructions
+                    // There are no more instructions
                     state = FINISH;
                     break;
                 }
@@ -56,7 +67,27 @@ int main() {
         }
     }
 
-    write_memory(dataMemoryFileName, mar, mbr);
+}
+
+/**
+ * Reads instructions and data from memory and handles the instruction cycle until the end of the instructions.
+ */
+int main() {
+
+    init_control_unit();
+    acm_init(10);
+
+    int program_number = 5;
+
+    for (int i = 0; i < 5; i++) {
+        run(program_number);
+        pc = 0;
+    }
+
+    write_data_memory(data_memory_file_name, mar, mbr);
     printf("Process finished with %d cycles.\n", cycles);
+
+    acm_finish();
+
     return 0;
 }

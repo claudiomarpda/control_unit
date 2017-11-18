@@ -168,4 +168,11 @@ void decode(const char *instruction);
  */
 void execute(int operation);
 
+void init_control_unit();
+
+/**
+ * Finds the data in the cache or in the memory
+ */
+int find_data_in_address(int mar);
+
 #endif //CONTROLUNIT_CONTROL_UNIT_H

@@ -5,6 +5,7 @@
 #include "../include/control_unit.h"
 #include "../include/memory.h"
 #include "../include/arithmetic_logic_unit.h"
+#include "../include/cache_associative.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,9 +24,38 @@ char *fetch(char instruction_memory[][INSTRUCTION_LENGTH]) {
     // Check empty instruction
     if (strcmp(instruction_memory[pc], "") == 0) {
         return NULL;
-    } else {
-        return instruction_memory[pc++];
     }
+
+    // Check if the instruction is in the cache
+    int index = acm_instruction_exists(pc);
+    if (index >= 0) {
+        // Is in the cache
+        if (LOG) {
+            printf("Instruction Cache HIT: ");
+        }
+
+        // Loading instruction from main memory costs 3 cycles
+        cycles += 3;
+
+        // Points to the next instruction
+        pc++;
+        return acm_read_instruction(index);
+    }
+
+    // Is not in the cache
+    if (LOG) {
+        printf("Instruction Cache MISS: ");
+    }
+
+    // Loading instruction from main memory costs 239 cycles
+    cycles += 239;
+
+    char *instruction = instruction_memory[pc];
+    // Save it in the cache
+    acm_write_instruction(pc, instruction);
+    // Points to the next instruction
+    pc++;
+    return instruction;
 }
 
 /**
@@ -315,26 +345,49 @@ void execute(const int operation) {
         printf("\nExecuting... ");
     }
 
-    // Let's assume that every execution costs 1 cycle
+    // Execution costs 1 cycle
     cycles++;
 
     switch (operation) {
         case LOAD_ADDRESS:
             mar = operand2;
-            mbr = indirect_memory_access(mar);
+            /*int index = amc_data_address_exist(mar);
+            if(index >= 0) {
+                // The address exists in cache
+                if (LOG) {
+                    printf("Cache HIT: ");
+                }
+                // Read data from cache
+                mbr = amc_read_data(index);
+                // Loading data from cache costs 3 cycle
+                cycles += 3;
+            }
+            else {
+                // The address is not in the cache
+                if (LOG) {
+                    printf("Cache MISS: ");
+                }
+
+                // Read data from main memory
+                mbr = indirect_memory_access(mar);
+                amc_write_data(mar, mbr);
+                // Loading data from main memory costs 239 cycle
+                cycles += 239;
+            }*/
+
+            mbr = find_data_in_address(mar);
+
             reg[operand1] = mbr;
-            // Let's assume that every fetch in memory costs 4 cycles additionally
-            cycles += 4;
             if (LOG) {
                 printf("R%d = %d from address %d\n\n", operand1 + 1, reg[operand1], operand2);
             }
             break;
         case LOAD_REGISTER:
             mar = reg[operand2];
-            mbr = indirect_memory_access(mar);
+//            mbr = indirect_memory_access(mar);
+            mbr = find_data_in_address(mar);
+//            cycles += 239;
             reg[operand1] = mbr;
-            // Let's assume that every fetch in memory costs 4 cycles additionally
-            cycles += 4;
             if (LOG) {
                 printf("R%d = %d from address %d\n\n", operand1 + 1, reg[operand1], reg[operand2]);
             }
@@ -441,4 +494,36 @@ void execute(const int operation) {
             rc = compare(reg[operand1], operand2);
             break;
     }
+}
+
+void init_control_unit() {
+    ir = NULL;
+    cycles = 0;
+}
+
+int find_data_in_address(int mar) {
+    int index = acm_data_address_exist(mar);
+    if (index >= 0) {
+        // The address exists in cache
+        if (LOG) {
+            printf("Data Cache HIT: ");
+        }
+        // Loading data from cache costs 3 cycles
+        cycles += 3;
+        // Read data from cache
+        return acm_read_data(index);
+    }
+
+    // The address is not in the cache
+    if (LOG) {
+        printf("Data Cache MISS: ");
+    }
+
+    // Loading data from main memory costs 239 cycles
+    cycles += 239;
+
+    // Read data from main memory
+    int mbr = indirect_memory_access(mar);
+    acm_write_data(mar, mbr);
+    return mbr;
 }
