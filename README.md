@@ -1,8 +1,14 @@
-# ControlUnit
-<h4>This is an implementation of a microprogrammed control unit according to Vonn Neumann model</h4>
+<h4>This is an implementation of a microprogrammed control unit according to Harvard architecture with cache memory system with didactic purpose</h4>
 
+<h3>Motivation</h3>
+<p>The memory access is slow, compared to the processor performance, so it is important to understand how the hardware works to make a good usage of it when developing software. This is mainly important for applications of critical performance.</p>
+
+<h3>Project</h3>
 Language: C11 Standard <br>
-IDE: CLion 2017.2.2
+IDE: CLion 2017.2.2 <br>
+Build: CMake
+
+<h1>Part 1: Control Unit</h1>
 
 <h2>Instructions Cycle</h2>
 
@@ -102,9 +108,10 @@ Example: COMPARE R1 0<br>
 
 <h2>Program Examples</h2>
 
-These are some examples of developed programs
+These are some examples of developed programs with ths project's assembly language
 
 <h4>Arithmetic operations</h4>
+<h6>Instructions Memory</h6>
 
 ```
 LOAD R1 100
@@ -118,7 +125,14 @@ SUBTRACT R1 R3 R2
 STORE R1 101
 ```
 
+<h6>Data Memory</h6>
+
+```
+100 10
+```
+
 <h4>Fibonacci Series</h4>
+<h6>Instructions Memory</h6>
 
 ```
 LOAD R9 100
@@ -140,7 +154,15 @@ DECREMENT R9
 JUMPu 6
 ```
 
+<h6>Data Memory</h6>
+
+```
+100 20
+```
+
 <h4>Bubble Sort</h4>
+
+<h6>Instructions Memory</h6>
 
 ```
 LOAD R9 100
@@ -169,3 +191,103 @@ JUMPu 7
 INCREMENT R1
 JUMPu 3
 ```
+
+<h6>Data Memory</h6>
+
+```
+100 10
+1 2
+2 12
+3 2
+4 9
+5 35
+6 8
+7 0
+8 88
+9 1
+10 3
+```
+
+<h1>Part 2: Cache Memory System</h1>
+
+<h3>Memory Access</h3>
+
+![alt tag](https://github.com/claudiomarpda/control_unit/blob/master/images/memory-access.png)
+
+<h3>Memory Access Decision Flow</h3>
+
+![alt tag](https://github.com/claudiomarpda/control_unit/blob/master/images/memory-access-flow.png)
+
+<h2>Mapping Functions</h2>
+<p>Only one cache level is used. The user can choose one of the two mapping functions below and check the cache hit and cache miss performance.</p>
+
+<h4>Direct Mapping</h4>
+<p>Each block of main memory is mapped to only one block line of the cache. The main memory is larger than the cache, so the mapping always takes care to make the address of the main memory to fit in cache.</p>
+
+<h4>Associative Mapping</h4>
+<p>One block of the main memory can be loaded in any line of the cache. The tag identifies one block unically and all of them must be verified to fetch a block, until find it or end the lines. The replacement algorithm is FIFO.</p>
+
+<h3>Matrix Loading Program</h3>
+<p>A program to stimulate the memory access so the cache system can be tested.</p>
+
+<h6>Instructions Memory</h6>
+
+```
+LOAD R9 100
+MOVE R8 101
+MOVE R1 0
+COMPARE R1 R9
+JUMPc -1 6
+JUMPu 99
+INCREMENT R1
+MOVE R2 0
+COMPARE R2 R9
+JUMPc -1 11
+JUMPu 3
+INCREMENT R2
+LOAD R3 R8
+INCREMENT R8
+JUMPu 8
+```
+
+<h6>Data Memory</h6>
+
+```
+100 5
+101 1
+102 2
+103 3
+104 4
+105 5
+106 6
+107 7
+108 8
+109 9
+110 10
+111 11
+112 12
+113 13
+114 14
+115 15
+116 16
+117 17
+118 18
+119 19
+120 20
+121 21
+122 22
+123 23
+124 24
+125 25
+```
+
+<h2>Cache Memory System Trending</h2>
+<p>These results were obtained with the above program executed several times without clearing the cache with different cache sizes. We can see that as the cache size increses, the cache hit tend to go up and the cache miss tend to go down, but it gets to a point that even though the cache size is increased, they tend to stabilize.</p>
+
+<h4>Direct Mapping</h4>
+
+![alt tag](https://github.com/claudiomarpda/control_unit/blob/master/images/direct-chart.png)
+
+<h4>Associative Mapping</h4>
+
+![alt tag](https://github.com/claudiomarpda/control_unit/blob/master/images/associative-chart.png)

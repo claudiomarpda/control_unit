@@ -13,11 +13,9 @@
 
 // Cache for instructions
 instruction_cache_t *dcm_instructions;
-//instruction_cache_t acm_instructions[cache_lines];
 
 // Cache for data
 data_cache_t *dcm_data;
-//data_cache_t acm_data[cache_lines];
 
 
 /**

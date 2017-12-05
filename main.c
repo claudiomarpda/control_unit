@@ -78,16 +78,19 @@ int main() {
     int total_hits[9];
     int total_misses[9];
 
+    // Initial cache size
     int k = 2;
+
     for (int i = 0; i < 9; i++) {
         init_control_unit();
         // Set cache size
         int cache_size = k;
         cache_init(DIRECT, cache_size);
 
-        // Run the same program several times
+        // Run the same program several times with different cache size
         for (int j = 0; j < 5; j++) {
             run(program_number, memory_size);
+            // Go to the begin of the instructions
             pc = 0;
         }
 
@@ -103,6 +106,7 @@ int main() {
         total_hits[i] = cache_hit;
         total_misses[i] = cache_miss;
 
+        // Increments cache size
         // 2 4 8 16 32 64 128
         k = k * 2;
     }
